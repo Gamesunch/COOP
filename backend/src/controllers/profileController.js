@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const path = require('path');
+const fs = require('fs');
 
 // GET /api/profile - Fetch current user's full profile
 exports.getProfile = async (req, res) => {
@@ -76,6 +77,20 @@ exports.uploadProfilePicture = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        // Delete old profile picture if it exists
+        const oldResult = await db.query(
+            'SELECT profile_picture_url FROM users WHERE id = $1',
+            [req.user.id]
+        );
+        if (oldResult.rows.length > 0 && oldResult.rows[0].profile_picture_url) {
+            const oldPath = path.join(__dirname, '../../uploads', path.basename(oldResult.rows[0].profile_picture_url));
+            fs.unlink(oldPath, (err) => {
+                if (err && err.code !== 'ENOENT') {
+                    console.warn('Failed to delete old profile picture:', err.message);
+                }
+            });
         }
 
         // Build the URL path to access the uploaded file
