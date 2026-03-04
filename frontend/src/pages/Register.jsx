@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, ArrowRight, Mail } from 'lucide-react';
+import { User, Lock, ArrowRight, Mail, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function Register() {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [role, setRole] = useState('STUDENT');
 
     const [firstName, setFirstName] = useState('');
@@ -13,6 +16,9 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -44,19 +50,9 @@ export default function Register() {
     };
 
     return (
-        <div className="flex-center" style={{ minHeight: '100vh', padding: '2rem', position: 'relative' }}>
+        <div className="flex-center" style={{ minHeight: '100vh', padding: '2rem', position: 'relative', background: 'var(--color-bg-dark)' }}>
 
-            {/* 3D Floating Elements Background */}
-            <motion.div
-                animate={{ y: [0, -30, 0], rotate: [0, 10, 0] }}
-                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-                style={{ position: 'absolute', top: '15%', left: '15%', width: '200px', height: '200px', borderRadius: '40%', background: 'linear-gradient(135deg, var(--color-primary), #c084fc)', filter: 'blur(50px)', opacity: 0.6, zIndex: 0 }}
-            />
-            <motion.div
-                animate={{ y: [0, 40, 0], scale: [1, 1.15, 1], rotate: [0, -10, 0] }}
-                transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-                style={{ position: 'absolute', bottom: '15%', right: '15%', width: '300px', height: '300px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-secondary), #fb7185)', filter: 'blur(70px)', opacity: 0.5, zIndex: 0 }}
-            />
+            <LanguageSwitcher style={{ position: 'absolute', top: '2rem', left: '2rem' }} />
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 30 }}
@@ -66,10 +62,11 @@ export default function Register() {
                 style={{ width: '100%', maxWidth: '480px', padding: '3.5rem', zIndex: 1, position: 'relative' }}
             >
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                    <h1 className="title-3d" style={{ fontSize: '2.8rem', marginBottom: '0.8rem' }}>
-                        <span className="text-gradient">Uni</span>Connect
+                    <h1 style={{ fontSize: '2.8rem', marginBottom: '0.8rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>Regis</span>
+                        <span style={{ fontWeight: 800, letterSpacing: '1px', color: 'white', background: 'var(--color-primary-dark)', padding: '0 12px', borderRadius: '12px' }}>SPHERE</span>
                     </h1>
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>Create your premium academic account</p>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('register_subtitle')}</p>
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem' }}>
@@ -81,17 +78,17 @@ export default function Register() {
                                 flex: 1,
                                 padding: '0.8rem',
                                 borderRadius: '10px',
-                                border: `1px solid ${role === r ? 'var(--color-primary)' : 'var(--glass-border)'}`,
-                                background: role === r ? 'rgba(139, 92, 246, 0.2)' : 'rgba(30, 41, 59, 0.4)',
-                                color: 'white',
+                                border: `1px solid ${role === r ? 'var(--color-secondary)' : 'var(--glass-border)'}`,
+                                background: role === r ? 'var(--color-secondary)' : 'var(--color-bg-light)',
+                                color: role === r ? 'white' : 'var(--color-text)',
                                 cursor: 'pointer',
                                 transition: 'all 0.3s',
                                 fontFamily: 'var(--font-main)',
-                                fontWeight: role === r ? 600 : 400,
-                                boxShadow: role === r ? '0 0 15px rgba(139, 92, 246, 0.3)' : 'none'
+                                fontWeight: role === r ? 600 : 500,
+                                boxShadow: role === r ? '0 4px 12px rgba(46, 167, 242, 0.25)' : 'inset 0 2px 4px rgba(0,0,0,0.02)'
                             }}
                         >
-                            {r}
+                            {t(r.toLowerCase())}
                         </button>
                     ))}
                 </div>
@@ -105,14 +102,14 @@ export default function Register() {
 
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <div className="input-group" style={{ flex: 1 }}>
-                            <label>First Name</label>
+                            <label>{t('firstName')}</label>
                             <div style={{ position: 'relative' }}>
                                 <User style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} size={18} />
                                 <input
                                     type="text"
                                     className="input-field"
                                     style={{ paddingLeft: '3.2rem' }}
-                                    placeholder="First"
+                                    placeholder={t('first')}
                                     value={firstName}
                                     onChange={e => setFirstName(e.target.value)}
                                     required
@@ -120,14 +117,14 @@ export default function Register() {
                             </div>
                         </div>
                         <div className="input-group" style={{ flex: 1 }}>
-                            <label>Last Name</label>
+                            <label>{t('lastName')}</label>
                             <div style={{ position: 'relative' }}>
                                 <User style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} size={18} />
                                 <input
                                     type="text"
                                     className="input-field"
                                     style={{ paddingLeft: '3.2rem' }}
-                                    placeholder="Last"
+                                    placeholder={t('last')}
                                     value={lastName}
                                     onChange={e => setLastName(e.target.value)}
                                     required
@@ -137,14 +134,14 @@ export default function Register() {
                     </div>
 
                     <div className="input-group">
-                        <label>Email Address</label>
+                        <label>{t('email_address')}</label>
                         <div style={{ position: 'relative' }}>
                             <Mail style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} size={18} />
                             <input
                                 type="email"
                                 className="input-field"
                                 style={{ paddingLeft: '3.2rem' }}
-                                placeholder="your.name@university.edu"
+                                placeholder={t('email_placeholder')}
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 required
@@ -153,34 +150,48 @@ export default function Register() {
                     </div>
 
                     <div className="input-group">
-                        <label>Password</label>
+                        <label>{t('password')}</label>
                         <div style={{ position: 'relative' }}>
                             <Lock style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} size={18} />
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 className="input-field"
-                                style={{ paddingLeft: '3.2rem' }}
+                                style={{ paddingLeft: '3.2rem', paddingRight: '3rem' }}
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 required
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{ position: 'absolute', right: '1.2rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: 'var(--color-text-muted)' }}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
                     </div>
 
                     <div className="input-group">
-                        <label>Confirm Password</label>
+                        <label>{t('confirm_password')}</label>
                         <div style={{ position: 'relative' }}>
                             <Lock style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} size={18} />
                             <input
-                                type="password"
+                                type={showConfirmPassword ? "text" : "password"}
                                 className="input-field"
-                                style={{ paddingLeft: '3.2rem' }}
+                                style={{ paddingLeft: '3.2rem', paddingRight: '3rem' }}
                                 placeholder="••••••••"
                                 value={confirmPassword}
                                 onChange={e => setConfirmPassword(e.target.value)}
                                 required
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                style={{ position: 'absolute', right: '1.2rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: 'var(--color-text-muted)' }}
+                            >
+                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
                     </div>
 
@@ -191,12 +202,12 @@ export default function Register() {
                         className="btn btn-primary"
                         style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', marginTop: '1rem' }}
                     >
-                        Create Account <ArrowRight size={20} />
+                        {t('register_button')} <ArrowRight size={20} />
                     </motion.button>
                 </form>
 
                 <div style={{ textAlign: 'center', marginTop: '2.5rem', fontSize: '1rem', color: 'var(--color-text-muted)' }}>
-                    Already have an account? <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }} style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 600 }}>Sign in</a>
+                    {t('already_have_account')} <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }} style={{ color: 'var(--color-primary-dark)', textDecoration: 'none', fontWeight: 600 }}>{t('sign_in')}</a>
                 </div>
             </motion.div>
         </div>

@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, ArrowRight } from 'lucide-react';
+import { User, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function Login() {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [role, setRole] = useState('STUDENT');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -38,19 +42,9 @@ export default function Login() {
     };
 
     return (
-        <div className="flex-center" style={{ minHeight: '100vh', padding: '2rem', position: 'relative' }}>
+        <div className="flex-center" style={{ minHeight: '100vh', padding: '2rem', position: 'relative', background: 'var(--color-bg-dark)' }}>
 
-            {/* 3D Floating Elements Background */}
-            <motion.div
-                animate={{ y: [0, -30, 0], rotate: [0, 10, 0] }}
-                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-                style={{ position: 'absolute', top: '15%', left: '15%', width: '200px', height: '200px', borderRadius: '40%', background: 'linear-gradient(135deg, var(--color-primary), #c084fc)', filter: 'blur(50px)', opacity: 0.6, zIndex: 0 }}
-            />
-            <motion.div
-                animate={{ y: [0, 40, 0], scale: [1, 1.15, 1], rotate: [0, -10, 0] }}
-                transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-                style={{ position: 'absolute', bottom: '15%', right: '15%', width: '300px', height: '300px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-secondary), #fb7185)', filter: 'blur(70px)', opacity: 0.5, zIndex: 0 }}
-            />
+            <LanguageSwitcher style={{ position: 'absolute', top: '2rem', left: '2rem' }} />
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 30 }}
@@ -60,10 +54,11 @@ export default function Login() {
                 style={{ width: '100%', maxWidth: '480px', padding: '3.5rem', zIndex: 1, position: 'relative' }}
             >
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                    <h1 className="title-3d" style={{ fontSize: '2.8rem', marginBottom: '0.8rem' }}>
-                        <span className="text-gradient">Uni</span>Connect
+                    <h1 style={{ fontSize: '2.8rem', marginBottom: '0.8rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>Regis</span>
+                        <span style={{ fontWeight: 800, letterSpacing: '1px', color: 'white', background: 'var(--color-primary-dark)', padding: '0 12px', borderRadius: '12px' }}>SPHERE</span>
                     </h1>
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>Welcome to your premium academic hub</p>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('login_subtitle')}</p>
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem' }}>
@@ -75,17 +70,17 @@ export default function Login() {
                                 flex: 1,
                                 padding: '0.8rem',
                                 borderRadius: '10px',
-                                border: `1px solid ${role === r ? 'var(--color-primary)' : 'var(--glass-border)'}`,
-                                background: role === r ? 'rgba(139, 92, 246, 0.2)' : 'rgba(30, 41, 59, 0.4)',
-                                color: 'white',
+                                border: `1px solid ${role === r ? 'var(--color-secondary)' : 'var(--glass-border)'}`,
+                                background: role === r ? 'var(--color-secondary)' : 'var(--color-bg-light)',
+                                color: role === r ? 'white' : 'var(--color-text)',
                                 cursor: 'pointer',
                                 transition: 'all 0.3s',
                                 fontFamily: 'var(--font-main)',
-                                fontWeight: role === r ? 600 : 400,
-                                boxShadow: role === r ? '0 0 15px rgba(139, 92, 246, 0.3)' : 'none'
+                                fontWeight: role === r ? 600 : 500,
+                                boxShadow: role === r ? '0 4px 12px rgba(46, 167, 242, 0.25)' : 'inset 0 2px 4px rgba(0,0,0,0.02)'
                             }}
                         >
-                            {r}
+                            {t(r.toLowerCase())}
                         </button>
                     ))}
                 </div>
@@ -98,14 +93,14 @@ export default function Login() {
                     )}
 
                     <div className="input-group">
-                        <label>Email Address</label>
+                        <label>{t('email_address')}</label>
                         <div style={{ position: 'relative' }}>
                             <User style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} size={18} />
                             <input
                                 type="email"
                                 className="input-field"
                                 style={{ paddingLeft: '3.2rem' }}
-                                placeholder="your.name@university.edu"
+                                placeholder={t('email_placeholder')}
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 required
@@ -114,27 +109,34 @@ export default function Login() {
                     </div>
 
                     <div className="input-group">
-                        <label>Password</label>
+                        <label>{t('password')}</label>
                         <div style={{ position: 'relative' }}>
                             <Lock style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} size={18} />
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 className="input-field"
-                                style={{ paddingLeft: '3.2rem' }}
+                                style={{ paddingLeft: '3.2rem', paddingRight: '3rem' }}
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 required
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{ position: 'absolute', right: '1.2rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: 'var(--color-text-muted)' }}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', fontSize: '0.95rem' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                             <input type="checkbox" style={{ accentColor: 'var(--color-primary)', width: '16px', height: '16px' }} />
-                            <span style={{ color: 'var(--color-text-muted)' }}>Remember me</span>
+                            <span style={{ color: 'var(--color-text-muted)' }}>{t('remember_me')}</span>
                         </label>
-                        <a href="#" style={{ color: 'var(--color-secondary)', textDecoration: 'none', fontWeight: 500 }}>Forgot password?</a>
+                        <a href="#" style={{ color: 'var(--color-secondary)', textDecoration: 'none', fontWeight: 500 }}>{t('forgot_password')}</a>
                     </div>
 
                     <motion.button
@@ -144,12 +146,12 @@ export default function Login() {
                         className="btn btn-primary"
                         style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
                     >
-                        Access Portal <ArrowRight size={20} />
+                        {t('login_button')} <ArrowRight size={20} />
                     </motion.button>
                 </form>
 
                 <div style={{ textAlign: 'center', marginTop: '2.5rem', fontSize: '1rem', color: 'var(--color-text-muted)' }}>
-                    New to UniConnect? <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }} style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 600 }}>Create an account</a>
+                    {t('new_user')} <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }} style={{ color: 'var(--color-primary-dark)', textDecoration: 'none', fontWeight: 600 }}>{t('create_account')}</a>
                 </div>
             </motion.div>
         </div>

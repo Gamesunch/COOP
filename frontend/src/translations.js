@@ -1,0 +1,118 @@
+const translations = {
+    en: {
+        // App / Common
+        'student': 'STUDENT',
+        'professor': 'PROFESSOR',
+        'email_address': 'Email Address',
+        'password': 'Password',
+        'firstName': 'First Name',
+        'lastName': 'Last Name',
+        'first': 'First',
+        'last': 'Last',
+        'confirm_password': 'Confirm Password',
+
+        // Login
+        'login_title': 'Regis',
+        'login_subtitle': 'Welcome to your academic hub',
+        'remember_me': 'Remember me',
+        'forgot_password': 'Forgot password?',
+        'login_button': 'Login',
+        'new_user': 'New to RegisSphere?',
+        'create_account': 'Create an account',
+        'email_placeholder': 'your.name@university.edu',
+
+        // Register
+        'register_subtitle': 'Create your academic account',
+        'register_button': 'Create Account',
+        'already_have_account': 'Already have an account?',
+        'sign_in': 'Sign in',
+
+        // Dashboard
+        'student_portal': 'Student Portal',
+        'logout': 'Logout Session',
+        'overview': 'Overview',
+        'my_courses': 'My Courses',
+        'enrollment': 'Enrollment',
+        'settings': 'Settings',
+        'welcome_back': 'Welcome back',
+        'academic_overview': 'Here\'s your academic overview for today.',
+        'search_placeholder': 'Search anything...',
+        'total_credits': 'Total Credits',
+        'this_semester': 'this semester',
+        'current_gpa': 'Current GPA',
+        'top_15': 'Top 15%',
+        'of_class': 'of class',
+        'action_items': 'Action Items',
+        'tasks_pending': 'Tasks pending within 7 days',
+        'today_schedule': 'Today\'s Course Schedule',
+        'view_calendar': 'View Full Calendar',
+        'uni_news': 'University News',
+        'event': 'EVENT',
+        'notice': 'NOTICE',
+        'news_1_title': 'Annual Tech Job Fair',
+        'news_1_desc': 'Join us at the Main Campus for networking with top tier tech companies.',
+        'news_2_title': 'Course Registration',
+        'news_2_desc': 'Fall semester enrollment period begins next Monday at 8:00 AM.',
+        'loading': 'Loading System...',
+        'student_role_display': 'Student'
+    },
+    th: {
+        // App / Common
+        'student': 'นักศึกษา',
+        'professor': 'อาจารย์',
+        'email_address': 'อีเมล',
+        'password': 'รหัสผ่าน',
+        'firstName': 'ชื่อ',
+        'lastName': 'นามสกุล',
+        'first': 'ชื่อจริง',
+        'last': 'นามสกุล',
+        'confirm_password': 'ยืนยันรหัสผ่าน',
+
+        // Login
+        'login_title': 'Regis',
+        'login_subtitle': 'ยินดีต้อนรับสู่ศูนย์กลางการศึกษาของคุณ',
+        'remember_me': 'จดจำฉัน',
+        'forgot_password': 'ลืมรหัสผ่าน?',
+        'login_button': 'เข้าสู่ระบบ',
+        'new_user': 'ผู้ใช้ใหม่ใน RegisSphere ใช่ไหม?',
+        'create_account': 'สร้างบัญชี',
+        'email_placeholder': 'ชื่อของคุณ@university.edu',
+
+        // Register
+        'register_subtitle': 'สร้างบัญชีของคุณ',
+        'register_button': 'สร้างบัญชี',
+        'already_have_account': 'มีบัญชีอยู่แล้ว?',
+        'sign_in': 'เข้าสู่ระบบ',
+
+        // Dashboard
+        'student_portal': 'พอร์ทัลนักศึกษา',
+        'logout': 'ออกจากระบบ',
+        'overview': 'ภาพรวม',
+        'my_courses': 'วิชาของฉัน',
+        'enrollment': 'การลงทะเบียน',
+        'settings': 'การตั้งค่า',
+        'welcome_back': 'ยินดีต้อนรับกลับมา',
+        'academic_overview': 'นี่คือภาพรวมการศึกษาของคุณในวันนี้',
+        'search_placeholder': 'ค้นหาทุกสิ่ง...',
+        'total_credits': 'หน่วยกิตรวม',
+        'this_semester': 'เทอมนี้',
+        'current_gpa': 'เกรดเฉลี่ยปัจจุบัน',
+        'top_15': '15% สูงสุด',
+        'of_class': 'ของชั้นเรียน',
+        'action_items': 'สิ่งที่จะต้องทำ',
+        'tasks_pending': 'งานที่ค้างอยู่ใน 7 วัน',
+        'today_schedule': 'ตารางเรียนวันนี้',
+        'view_calendar': 'ดูปฏิทินเต็ม',
+        'uni_news': 'ข่าวสารมหาวิทยาลัย',
+        'event': 'กิจกรรม',
+        'notice': 'ประกาศ',
+        'news_1_title': 'งานนิทรรศการงานเทคโนโลยีประจำปี',
+        'news_1_desc': 'เข้าร่วมกับเราที่วิทยาเขตหลักเพื่อสร้างเครือข่ายกับบริษัทเทคโนโลยีชั้นนำ',
+        'news_2_title': 'การลงทะเบียนเรียน',
+        'news_2_desc': 'ช่วงเวลาการลงทะเบียนเรียนภาคเรียนเริ่มวันจันทร์หน้าเวลา 08:00 น.',
+        'loading': 'กำลังโหลด...',
+        'student_role_display': 'นักศึกษา'
+    }
+};
+
+export default translations;
