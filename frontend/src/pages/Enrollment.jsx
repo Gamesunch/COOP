@@ -17,6 +17,7 @@ export default function Enrollment() {
     const [enrollingId, setEnrollingId] = useState(null);
     const [message, setMessage] = useState({ text: '', type: '' });
     const [user, setUser] = useState(null);
+    const [phase, setPhase] = useState('ENROLLMENT');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -32,6 +33,15 @@ export default function Enrollment() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (profileRes.ok) setUser(await profileRes.json());
+
+            // Fetch phase
+            const phaseRes = await fetch(`${API_BASE}/api/admin/phase`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (phaseRes.ok) {
+                const phaseData = await phaseRes.json();
+                setPhase(phaseData.phase);
+            }
 
             // Fetch all courses
             const courseRes = await fetch(`${API_BASE}/api/courses`, {
@@ -144,7 +154,9 @@ export default function Enrollment() {
                 <motion.header initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}
                     style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                     <div>
-                        <h1 style={{ fontSize: '2.2rem', marginBottom: '0.3rem', fontWeight: 600 }}>{t('course_catalog')}</h1>
+                        <h1 style={{ fontSize: '2.2rem', marginBottom: '0.3rem', fontWeight: 600 }}>
+                            {phase === 'PRE_ENROLLMENT' ? 'Pre-Enrollment (Course Catalog)' : t('course_catalog')}
+                        </h1>
                         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('browse_enroll_desc')}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
@@ -164,6 +176,20 @@ export default function Enrollment() {
                     </div>
                 )}
 
+                {phase === 'PRE_ENROLLMENT' && (
+                    <div style={{ marginBottom: '1.5rem', padding: '1rem 1.5rem', borderRadius: '12px', background: 'rgba(242, 159, 5, 0.15)', borderLeft: '4px solid var(--color-primary)', color: 'var(--color-text)' }}>
+                        <h4 style={{ fontWeight: 700, color: 'var(--color-primary)', marginBottom: '0.4rem', fontSize: '1.1rem' }}>Pre-Enrollment Period Active</h4>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>Reserving a spot does not guarantee final placement if demand exceeds capacity. You will be waitlisted if the class fills up when official enrollment starts.</p>
+                    </div>
+                )}
+
+                {phase === 'CLOSED' && (
+                    <div style={{ marginBottom: '1.5rem', padding: '1rem 1.5rem', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)', borderLeft: '4px solid #ef4444', color: 'var(--color-text)' }}>
+                        <h4 style={{ fontWeight: 700, color: '#ef4444', marginBottom: '0.4rem', fontSize: '1.1rem' }}>Enrollment Closed</h4>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>The active enrollment period is currently closed. You cannot enroll or pre-enroll in courses at this time.</p>
+                    </div>
+                )}
+
                 {/* Search Bar */}
                 <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', padding: '0.8rem 1.5rem', borderRadius: '50px', marginBottom: '2rem', background: 'var(--color-bg-light)' }}>
                     <Search size={20} color="var(--color-text-muted)" />
@@ -174,7 +200,8 @@ export default function Enrollment() {
                 {/* Course Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '1.5rem', paddingBottom: '2rem' }}>
                     {filteredCourses.map((course, i) => {
-                        const isEnrolled = enrolledCourseIds.includes(course.id);
+                        const enrollment = myEnrollments.find(e => e.id === course.id);
+                        const isEnrolled = !!enrollment;
                         return (
                             <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                                 className="glass-panel" style={{ padding: '1.8rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -207,14 +234,20 @@ export default function Enrollment() {
                                 </div>
 
                                 {isEnrolled ? (
-                                    <div style={{ padding: '0.8rem', textAlign: 'center', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', fontWeight: 600, fontSize: '0.95rem', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                                        {t('enrolled_badge')}
+                                    <div style={{
+                                        padding: '0.8rem', textAlign: 'center', borderRadius: '12px',
+                                        background: enrollment.status === 'PRE_ENROLLED' ? 'rgba(242, 159, 5, 0.1)' : (enrollment.status === 'WAITLISTED' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)'),
+                                        color: enrollment.status === 'PRE_ENROLLED' ? 'var(--color-primary)' : (enrollment.status === 'WAITLISTED' ? '#ef4444' : '#10b981'),
+                                        fontWeight: 600, fontSize: '0.95rem',
+                                        border: `1px solid ${enrollment.status === 'PRE_ENROLLED' ? 'rgba(242, 159, 5, 0.2)' : (enrollment.status === 'WAITLISTED' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)')}`
+                                    }}>
+                                        {enrollment.status === 'PRE_ENROLLED' ? 'Pre-Enrolled' : (enrollment.status === 'WAITLISTED' ? 'Waitlisted' : t('enrolled_badge'))}
                                     </div>
                                 ) : (
                                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                                        className="btn btn-primary" onClick={() => handleEnroll(course.id)} disabled={enrollingId === course.id}
-                                        style={{ padding: '0.8rem', borderRadius: '12px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                        <BookPlus size={18} /> {enrollingId === course.id ? t('enrolling') : t('enroll_btn')}
+                                        className="btn btn-primary" onClick={() => handleEnroll(course.id)} disabled={enrollingId === course.id || phase === 'CLOSED'}
+                                        style={{ padding: '0.8rem', borderRadius: '12px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', opacity: phase === 'CLOSED' ? 0.5 : 1, cursor: phase === 'CLOSED' ? 'not-allowed' : 'pointer' }}>
+                                        <BookPlus size={18} /> {enrollingId === course.id ? t('enrolling') : (phase === 'PRE_ENROLLMENT' ? 'Pre-Enroll' : t('enroll_btn'))}
                                     </motion.button>
                                 )}
                             </motion.div>

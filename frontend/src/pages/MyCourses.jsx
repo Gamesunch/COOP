@@ -14,14 +14,9 @@ const GRADE_COLORS = {
 };
 
 const COURSE_COLORS = [
-    { bg: '#F29F05', border: '#D98904', text: '#ffffff' },
-    { bg: '#2EA7F2', border: '#1D8CD4', text: '#ffffff' },
-    { bg: '#10b981', border: '#059669', text: '#ffffff' },
-    { bg: '#a855f7', border: '#9333ea', text: '#ffffff' },
-    { bg: '#ef4444', border: '#dc2626', text: '#ffffff' },
-    { bg: '#ec4899', border: '#db2777', text: '#ffffff' },
-    { bg: '#14b8a6', border: '#0d9488', text: '#ffffff' },
-    { bg: '#f59e0b', border: '#d97706', text: '#ffffff' },
+    { bg: '#9BCAF2', text: '#000000' },
+    { bg: '#C2DCF2', text: '#000000' },
+    { bg: '#F2D6B3', text: '#000000' },
 ];
 
 const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
@@ -61,6 +56,7 @@ export default function MyCourses() {
     const [message, setMessage] = useState({ text: '', type: '' });
     const [user, setUser] = useState(null);
     const [activeTab, setActiveTab] = useState('courses');
+    const [confirmDropModalId, setConfirmDropModalId] = useState(null);
     const timetableRef = useRef(null);
 
     useEffect(() => {
@@ -80,16 +76,17 @@ export default function MyCourses() {
         setLoading(false);
     };
 
-    const handleDrop = async (enrollmentId) => {
-        if (!window.confirm(t('drop_confirm'))) return;
-        setDroppingId(enrollmentId);
+    const executeDrop = async () => {
+        if (!confirmDropModalId) return;
+        setDroppingId(confirmDropModalId);
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_BASE}/api/enrollments/${enrollmentId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch(`${API_BASE}/api/enrollments/${confirmDropModalId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
             if (res.ok) { setMessage({ text: t('drop_success'), type: 'success' }); fetchData(); }
             else { const data = await res.json(); setMessage({ text: data.error || t('drop_error'), type: 'error' }); }
         } catch (err) { setMessage({ text: t('drop_error'), type: 'error' }); }
         setDroppingId(null);
+        setConfirmDropModalId(null);
         setTimeout(() => setMessage({ text: '', type: '' }), 4000);
     };
 
@@ -122,6 +119,7 @@ export default function MyCourses() {
     // Build timetable blocks
     const timetableBlocks = [];
     enrollments.forEach((course, idx) => {
+        if (course.status === 'WAITLISTED') return;
         const slots = parseSchedule(course.schedule_time);
         const color = COURSE_COLORS[idx % COURSE_COLORS.length];
         slots.forEach(slot => {
@@ -253,6 +251,17 @@ export default function MyCourses() {
                                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><User size={13} /> {course.prof_last ? `Prof. ${course.prof_last}` : t('no_professor')}</span>
                                             </div>
                                         </div>
+                                        {/* Status Badge */}
+                                        <span style={{
+                                            fontWeight: 700, fontSize: '0.85rem', whiteSpace: 'nowrap', marginRight: '1rem',
+                                            color: course.status === 'PRE_ENROLLED' ? 'var(--color-primary)' : (course.status === 'WAITLISTED' ? '#ef4444' : '#10b981'),
+                                            background: course.status === 'PRE_ENROLLED' ? 'rgba(242, 159, 5, 0.1)' : (course.status === 'WAITLISTED' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)'),
+                                            border: `1px solid ${course.status === 'PRE_ENROLLED' ? 'rgba(242, 159, 5, 0.2)' : (course.status === 'WAITLISTED' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)')}`,
+                                            padding: '4px 10px', borderRadius: '6px'
+                                        }}>
+                                            {course.status === 'PRE_ENROLLED' ? 'Pre-Enrolled' : (course.status === 'WAITLISTED' ? 'Waitlisted' : t('enrolled_badge') || 'Enrolled')}
+                                        </span>
+
                                         {course.grade && (
                                             <span style={{
                                                 fontWeight: 700, fontSize: '0.95rem', whiteSpace: 'nowrap', marginRight: '1rem',
@@ -265,7 +274,7 @@ export default function MyCourses() {
                                         )}
                                         <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.95rem', whiteSpace: 'nowrap', background: 'rgba(242, 159, 5, 0.08)', padding: '6px 14px', borderRadius: '8px', marginRight: '2rem' }}>{course.credits} {t('credits')}</span>
                                         <motion.button whileHover={{ scale: 1.05, backgroundColor: 'rgba(239, 68, 68, 0.2)' }} whileTap={{ scale: 0.95 }}
-                                            onClick={() => handleDrop(course.enrollment_id)} disabled={droppingId === course.enrollment_id}
+                                            onClick={() => setConfirmDropModalId(course.enrollment_id)} disabled={droppingId === course.enrollment_id}
                                             style={{ padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.2)', background: 'rgba(239, 68, 68, 0.08)', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500, fontSize: '0.85rem', fontFamily: 'var(--font-main)', marginLeft: '1rem', whiteSpace: 'nowrap' }}>
                                             <Trash2 size={15} /> {droppingId === course.enrollment_id ? '...' : t('drop_btn')}
                                         </motion.button>
@@ -288,11 +297,11 @@ export default function MyCourses() {
                             <h3 style={{ textAlign: 'center', fontWeight: 700, fontSize: '1.2rem', marginBottom: '1rem', color: '#262526' }}>{t('tab_timetable')}</h3>
                             <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(30, 1fr)', fontSize: '0.72rem', minWidth: '1100px' }}>
                                 {/* Header Row */}
-                                <div style={{ padding: '0.5rem', fontWeight: 700, textAlign: 'center', background: '#F29F05', color: 'white', borderRadius: '8px 0 0 0', fontSize: '0.72rem' }}>{t('day_time')}</div>
+                                <div style={{ padding: '0.5rem', fontWeight: 700, textAlign: 'center', background: '#0D0D0D', color: '#F0F1F2', borderRadius: '8px 0 0 0', fontSize: '0.72rem' }}>{t('day_time')}</div>
                                 {HALF_HOURS.map((slot, i) => (
                                     <div key={i} style={{
-                                        padding: '0.4rem 0', fontWeight: slot.min === 0 ? 700 : 400, textAlign: 'center', background: '#F29F05', color: 'white',
-                                        fontSize: slot.min === 0 ? '0.68rem' : '0.58rem', borderLeft: slot.min === 0 ? '1px solid rgba(255,255,255,0.3)' : 'none',
+                                        padding: '0.4rem 0', fontWeight: slot.min === 0 ? 700 : 400, textAlign: 'center', background: '#0D0D0D', color: '#F0F1F2',
+                                        fontSize: slot.min === 0 ? '0.68rem' : '0.58rem', borderLeft: slot.min === 0 ? '1px solid rgba(255,255,255,0.1)' : 'none',
                                         borderRadius: i === HALF_HOURS.length - 1 ? '0 8px 0 0' : '0', opacity: slot.min === 0 ? 1 : 0.7
                                     }}>
                                         {`${slot.hour.toString().padStart(2, '0')}:${slot.min === 0 ? '00' : '30'}`}
@@ -325,9 +334,8 @@ export default function MyCourses() {
                                                 return (
                                                     <div key={i} style={{
                                                         position: 'absolute', left: `${left}%`, width: `${width}%`, top: '4px', bottom: '4px',
-                                                        background: `linear-gradient(135deg, ${block.color.bg}, ${block.color.border})`,
-                                                        boxShadow: '0 4px 10px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.3)',
-                                                        borderRadius: '8px', border: 'none',
+                                                        backgroundColor: block.color.bg,
+                                                        borderRadius: '8px', border: '1px solid rgba(0,0,0,0.05)',
                                                         padding: '3px 6px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
                                                         overflow: 'hidden', zIndex: 2, cursor: 'default'
                                                     }}
@@ -394,6 +402,36 @@ export default function MyCourses() {
                     </div>
                 )}
             </main>
+
+            {/* Confirmation Modal */}
+            {confirmDropModalId && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }}>
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel"
+                        style={{ padding: '2rem', borderRadius: '16px', maxWidth: '400px', width: '90%', textAlign: 'center' }}>
+                        <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+                            <Trash2 size={30} color="#ef4444" />
+                        </div>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--color-text)' }}>{t('drop_confirm_title') || 'Confirm Drop'}</h3>
+                        <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem', lineHeight: 1.5 }}>
+                            {t('drop_confirm_desc') || 'Are you sure you want to drop this course? This action cannot be undone.'}
+                        </p>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button className="btn" onClick={() => setConfirmDropModalId(null)}
+                                style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
+                                {t('cancel')}
+                            </button>
+                            <button className="btn" onClick={executeDrop}
+                                style={{ flex: 1, padding: '0.8rem', background: '#ef4444', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(239, 68, 68, 0.3)' }}>
+                                {t('confirm_drop') || 'Drop Course'}
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 }

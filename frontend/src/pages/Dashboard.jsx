@@ -11,6 +11,8 @@ export default function Dashboard() {
     const [user, setUser] = useState(null);
     const [courses, setCourses] = useState([]);
     const [stats, setStats] = useState({ credits: 0, pending: 0, gpa: 'N/A' });
+    const [adminPhase, setAdminPhase] = useState('ENROLLMENT');
+    const [demandData, setDemandData] = useState([]);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -22,42 +24,40 @@ export default function Dashboard() {
         // Fetch user and system data
         const fetchData = async () => {
             try {
-                // Fetch profile from API for latest data (including picture)
+                // Fetch profile
                 const profileRes = await fetch('http://localhost:5000/api/profile', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                let currentUser = null;
                 if (profileRes.ok) {
-                    const profileData = await profileRes.json();
-                    setUser(profileData);
+                    currentUser = await profileRes.json();
+                    setUser(currentUser);
                 } else {
-                    // Fallback to localStorage
-                    const userStored = JSON.parse(localStorage.getItem('user'));
-                    setUser(userStored);
+                    currentUser = JSON.parse(localStorage.getItem('user'));
+                    setUser(currentUser);
                 }
 
                 // Fetch courses
                 const courseRes = await fetch('http://localhost:5000/api/courses', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (courseRes.ok) {
-                    const courseData = await courseRes.json();
-                    setCourses(courseData);
-                } else {
-                    console.error("Failed to fetch courses:", courseRes.status);
-                }
+                if (courseRes.ok) setCourses(await courseRes.json());
 
-                // Fetch stats (mock data for now, replace with actual API call)
-                // For example:
-                // const statsRes = await fetch('http://localhost:5000/api/stats', {
-                //     headers: { 'Authorization': `Bearer ${token}` }
-                // });
-                // if (statsRes.ok) {
-                //     const statsData = await statsRes.json();
-                //     setStats(statsData);
-                // } else {
-                //     console.error("Failed to fetch stats:", statsRes.status);
-                // }
-                setStats({ credits: 84, pending: 4, gpa: '3.85' }); // Mock stats
+                // Mock stats
+                setStats({ credits: 84, pending: 4, gpa: '3.85' });
+
+                // Admin/Professor Data
+                if (currentUser && (currentUser.role === 'ADMIN' || currentUser.role === 'PROFESSOR')) {
+                    const phaseRes = await fetch('http://localhost:5000/api/admin/phase', { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (phaseRes.ok) {
+                        const phaseData = await phaseRes.json();
+                        setAdminPhase(phaseData.phase);
+                    }
+                    const demandRes = await fetch('http://localhost:5000/api/admin/demand', { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (demandRes.ok) {
+                        setDemandData(await demandRes.json());
+                    }
+                }
 
             } catch (err) {
                 console.error("Dashboard mount error", err);
@@ -173,6 +173,93 @@ export default function Dashboard() {
 
                 {/* Widgets Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '2rem', paddingBottom: '2rem' }}>
+
+                    {/* Admin Panel (If Applicable) */}
+                    {(user.role === 'ADMIN' || user.role === 'PROFESSOR') && (
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel" style={{ gridColumn: 'span 12', padding: '2.5rem', border: '1px solid var(--color-primary)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <div>
+                                    <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-primary)' }}>Faculty & Admin Controls</h3>
+                                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>Manage enrollment phases and course capacity</p>
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <span style={{ fontWeight: 600 }}>Current Phase:</span>
+                                    <select
+                                        value={adminPhase}
+                                        onChange={async (e) => {
+                                            const newPhase = e.target.value;
+                                            setAdminPhase(newPhase);
+                                            await fetch('http://localhost:5000/api/admin/phase', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                                                body: JSON.stringify({ phase: newPhase })
+                                            });
+                                            // Refresh demand data
+                                            const demandRes = await fetch('http://localhost:5000/api/admin/demand', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                                            if (demandRes.ok) setDemandData(await demandRes.json());
+                                        }}
+                                        style={{ padding: '0.6rem 1rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
+                                    >
+                                        <option value="PRE_ENROLLMENT">Pre-Enrollment</option>
+                                        <option value="ENROLLMENT">Active Enrollment</option>
+                                        <option value="CLOSED">Closed</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <h4 style={{ fontWeight: 600, marginBottom: '1rem', fontSize: '1.1rem' }}>Course Demand (Pre-Enrollment Analytics)</h4>
+                            <div style={{ overflowX: 'auto', background: 'var(--color-bg-light)', borderRadius: '12px', padding: '1rem' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                    <thead>
+                                        <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
+                                            <th style={{ padding: '0.8rem' }}>Course</th>
+                                            <th style={{ padding: '0.8rem', textAlign: 'center' }}>Capacity</th>
+                                            <th style={{ padding: '0.8rem', textAlign: 'center' }}>Pre-Enrolled</th>
+                                            <th style={{ padding: '0.8rem', textAlign: 'center' }}>Waitlisted</th>
+                                            <th style={{ padding: '0.8rem', textAlign: 'center' }}>Officially Enrolled</th>
+                                            <th style={{ padding: '0.8rem', textAlign: 'right' }}>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {demandData.map(course => {
+                                            const c_cap = parseInt(course.capacity);
+                                            const pre_en = parseInt(course.pre_enrolled_count);
+                                            const isBottleneck = pre_en > c_cap;
+                                            return (
+                                                <tr key={course.id} style={{ borderBottom: '1px solid var(--glass-border)', background: isBottleneck ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
+                                                    <td style={{ padding: '0.8rem', fontWeight: 600 }}>{course.code} - {course.name}</td>
+                                                    <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.capacity}</td>
+                                                    <td style={{ padding: '0.8rem', textAlign: 'center', color: isBottleneck ? '#ef4444' : 'var(--color-text)' }}>
+                                                        {course.pre_enrolled_count}
+                                                    </td>
+                                                    <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.waitlisted_count}</td>
+                                                    <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.enrolled_count}</td>
+                                                    <td style={{ padding: '0.8rem', textAlign: 'right' }}>
+                                                        <button
+                                                            onClick={async () => {
+                                                                const newCap = prompt(`Enter new capacity for ${course.code} (Current: ${course.capacity}):`, course.capacity);
+                                                                if (newCap && !isNaN(newCap)) {
+                                                                    await fetch(`http://localhost:5000/api/admin/courses/${course.id}/capacity`, {
+                                                                        method: 'PUT',
+                                                                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                                                                        body: JSON.stringify({ capacity: parseInt(newCap) })
+                                                                    });
+                                                                    const demandRes = await fetch('http://localhost:5000/api/admin/demand', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                                                                    if (demandRes.ok) setDemandData(await demandRes.json());
+                                                                }
+                                                            }}
+                                                            style={{ padding: '0.4rem 0.8rem', background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                            Edit Cap
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </motion.div>
+                    )}
 
                     {/* Stats Cards */}
                     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem' }}>

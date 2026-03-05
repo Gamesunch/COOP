@@ -5,12 +5,27 @@ exports.enrollCourse = async (req, res) => {
         const student_id = req.user.id;
         const { course_id } = req.body;
 
-        // 1. Check if course exists and has capacity
+        // Fetch current phase
+        const phaseRes = await db.query("SELECT value FROM system_settings WHERE key = 'enrollment_phase'");
+        const phase = phaseRes.rows.length > 0 ? phaseRes.rows[0].value : 'ENROLLMENT';
+
+        if (phase === 'CLOSED') {
+            return res.status(403).json({ error: 'Enrollment is currently closed.' });
+        }
+
+        // 1. Check if course exists
         const courseRes = await db.query('SELECT * FROM courses WHERE id = $1', [course_id]);
         if (courseRes.rows.length === 0) return res.status(404).json({ error: 'Course not found' });
+        const courseToEnroll = courseRes.rows[0];
 
-        // Simplistic capacity check (Production logic would COUNT enrollments) 
-        // const enrolledCount = await db.query('SELECT COUNT(*) FROM enrollments WHERE course_id = $1', [course_id]);
+        // Ensure capacity is respected only during active ENROLLMENT
+        if (phase === 'ENROLLMENT') {
+            const enrolledCountRes = await db.query("SELECT COUNT(*) FROM enrollments WHERE course_id = $1 AND status = 'ENROLLED'", [course_id]);
+            const currentEnrolled = parseInt(enrolledCountRes.rows[0].count);
+            if (currentEnrolled >= courseToEnroll.capacity) {
+                return res.status(400).json({ error: 'Course is at full capacity' });
+            }
+        }
 
         // 2. Simplistic Time conflict check
         const currentCourses = await db.query(
@@ -20,8 +35,6 @@ exports.enrollCourse = async (req, res) => {
        WHERE e.student_id = $1`,
             [student_id]
         );
-
-        const courseToEnroll = courseRes.rows[0];
         const hasConflict = currentCourses.rows.some(
             c => c.schedule_time === courseToEnroll.schedule_time
         );
@@ -30,13 +43,17 @@ exports.enrollCourse = async (req, res) => {
             return res.status(409).json({ error: 'Time conflict with an existing enrolled course' });
         }
 
-        // 3. Enroll
+        // 3. Enroll or Pre-Enroll
+        const statusToInsert = phase === 'PRE_ENROLLMENT' ? 'PRE_ENROLLED' : 'ENROLLED';
         const result = await db.query(
             'INSERT INTO enrollments (student_id, course_id, status) VALUES ($1, $2, $3) RETURNING *',
-            [student_id, course_id, 'ENROLLED']
+            [student_id, course_id, statusToInsert]
         );
 
-        res.status(201).json({ message: 'Successfully enrolled', enrollment: result.rows[0] });
+        res.status(201).json({
+            message: phase === 'PRE_ENROLLMENT' ? 'Successfully pre-enrolled' : 'Successfully enrolled',
+            enrollment: result.rows[0]
+        });
     } catch (error) {
         if (error.code === '23505') { // Unique violation Postgres code
             return res.status(400).json({ error: 'Already enrolled in this course' });
