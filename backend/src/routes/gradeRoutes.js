@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { getMyGrades } = require('../controllers/gradeController');
-const { authenticate, authorize } = require('../middleware/authMiddleware');
+const { authenticateToken, requireRole } = require('../middlewares/authMiddleware');
 
-router.get('/mine', authenticate, authorize('STUDENT'), getMyGrades);
+router.get('/mine', authenticateToken, requireRole(['STUDENT']), getMyGrades);
 
 module.exports = router;
