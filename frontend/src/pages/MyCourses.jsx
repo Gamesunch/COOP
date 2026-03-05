@@ -297,11 +297,12 @@ export default function MyCourses() {
                             <h3 style={{ textAlign: 'center', fontWeight: 700, fontSize: '1.2rem', marginBottom: '1rem', color: '#262526' }}>{t('tab_timetable')}</h3>
                             <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(30, 1fr)', fontSize: '0.72rem', minWidth: '1100px' }}>
                                 {/* Header Row */}
-                                <div style={{ padding: '0.5rem', fontWeight: 700, textAlign: 'center', background: '#0D0D0D', color: '#F0F1F2', borderRadius: '8px 0 0 0', fontSize: '0.72rem' }}>{t('day_time')}</div>
+                                <div style={{ padding: '0.5rem', fontWeight: 700, textAlign: 'center', background: '#F3F4F6', color: '#4B5563', borderRadius: '8px 0 0 0', fontSize: '0.72rem', borderBottom: '1px solid #E5E7EB', borderRight: '1px solid #E5E7EB' }}>{t('day_time')}</div>
                                 {HALF_HOURS.map((slot, i) => (
                                     <div key={i} style={{
-                                        padding: '0.4rem 0', fontWeight: slot.min === 0 ? 700 : 400, textAlign: 'center', background: '#0D0D0D', color: '#F0F1F2',
-                                        fontSize: slot.min === 0 ? '0.68rem' : '0.58rem', borderLeft: slot.min === 0 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                                        padding: '0.4rem 0', fontWeight: slot.min === 0 ? 700 : 500, textAlign: 'center', background: '#F3F4F6', color: '#4B5563',
+                                        fontSize: slot.min === 0 ? '0.68rem' : '0.58rem', borderLeft: slot.min === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                                        borderBottom: '1px solid #E5E7EB',
                                         borderRadius: i === HALF_HOURS.length - 1 ? '0 8px 0 0' : '0', opacity: slot.min === 0 ? 1 : 0.7
                                     }}>
                                         {`${slot.hour.toString().padStart(2, '0')}:${slot.min === 0 ? '00' : '30'}`}
