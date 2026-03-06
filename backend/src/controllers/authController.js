@@ -18,9 +18,14 @@ exports.register = async (req, res) => {
         // By default users register as STUDENT unless specified
         const userRole = role && ['STUDENT', 'PROFESSOR', 'ADMIN'].includes(role) ? role : 'STUDENT';
 
+        let studentId = null;
+        if (userRole === 'STUDENT') {
+            studentId = `STU-${Math.floor(100000 + Math.random() * 900000)}`;
+        }
+
         const result = await db.query(
-            'INSERT INTO users (email, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, first_name, last_name, role',
-            [email, passwordHash, firstName, lastName, userRole]
+            'INSERT INTO users (email, password_hash, first_name, last_name, role, student_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, first_name, last_name, role, student_id',
+            [email, passwordHash, firstName, lastName, userRole, studentId]
         );
 
         res.status(201).json({ message: 'User created successfully', user: result.rows[0] });

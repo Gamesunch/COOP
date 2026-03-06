@@ -156,3 +156,15 @@ exports.updateCapacity = async (req, res) => {
         res.status(500).json({ error: 'Server error updating capacity' });
     }
 };
+
+exports.getStudents = async (req, res) => {
+    try {
+        const result = await db.query(
+            "SELECT id, student_id, first_name, last_name, email, university, major, year_of_study, created_at FROM users WHERE role = 'STUDENT' ORDER BY last_name, first_name"
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error fetching students' });
+    }
+};

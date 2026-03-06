@@ -6,6 +6,8 @@ import Settings from './pages/Settings';
 import Enrollment from './pages/Enrollment';
 import MyCourses from './pages/MyCourses';
 import Grades from './pages/Grades';
+import CourseManagement from './pages/CourseManagement';
+import StudentManagement from './pages/StudentManagement';
 import { LanguageProvider } from './context/LanguageContext';
 import './index.css';
 
@@ -22,6 +24,8 @@ function App() {
           <Route path="/enrollment" element={<Enrollment />} />
           <Route path="/my-courses" element={<MyCourses />} />
           <Route path="/grades" element={<Grades />} />
+          <Route path="/admin/courses" element={<CourseManagement />} />
+          <Route path="/admin/students" element={<StudentManagement />} />
         </Routes>
       </Router>
     </LanguageProvider>

@@ -8,10 +8,15 @@ export default function Sidebar({ activePath }) {
     const navigate = useNavigate();
     const { t } = useLanguage();
     const [phase, setPhase] = useState('ENROLLMENT');
+    const [userRole, setUserRole] = useState('STUDENT');
 
     useEffect(() => {
         const fetchPhase = async () => {
             const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user && user.role) {
+                setUserRole(user.role);
+            }
             if (token) {
                 try {
                     const res = await fetch('http://localhost:5000/api/admin/phase', {
@@ -35,14 +40,24 @@ export default function Sidebar({ activePath }) {
         navigate('/login');
     };
 
-    const navItems = [
-        { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
-        { icon: BookOpen, label: t('my_courses'), path: '/my-courses' },
-        // Conditionally add Enrollment
-        ...(phase !== 'CLOSED' ? [{ icon: Users, label: t('enrollment'), path: '/enrollment' }] : []),
-        { icon: Award, label: t('grades'), path: '/grades' },
-        { icon: Settings, label: t('settings'), path: '/settings' }
-    ];
+    let navItems = [];
+    if (userRole === 'ADMIN' || userRole === 'PROFESSOR') {
+        navItems = [
+            { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
+            { icon: BookOpen, label: 'Manage Courses', path: '/admin/courses' },
+            { icon: Users, label: 'Student Users', path: '/admin/students' },
+            { icon: Settings, label: t('settings'), path: '/settings' }
+        ];
+    } else {
+        navItems = [
+            { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
+            { icon: BookOpen, label: t('my_courses'), path: '/my-courses' },
+            // Conditionally add Enrollment
+            ...(phase !== 'CLOSED' ? [{ icon: Users, label: t('enrollment'), path: '/enrollment' }] : []),
+            { icon: Award, label: t('grades'), path: '/grades' },
+            { icon: Settings, label: t('settings'), path: '/settings' }
+        ];
+    }
 
     return (
         <motion.aside
