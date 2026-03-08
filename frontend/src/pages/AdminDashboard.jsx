@@ -6,6 +6,10 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
     const [demandData, setDemandData] = useState([]);
     const [confirmPhaseModal, setConfirmPhaseModal] = useState({ show: false, newPhase: null });
     const [stats, setStats] = useState({ totalCourses: 0, overSubscribed: 0 });
+    const [newsTitle, setNewsTitle] = useState('');
+    const [newsContent, setNewsContent] = useState('');
+    const [newsPosting, setNewsPosting] = useState(false);
+    const [activeTab, setActiveTab] = useState('overview');
 
     useEffect(() => {
         const fetchDemand = async () => {
@@ -51,115 +55,205 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
         window.location.reload();
     };
 
+    const handlePostNews = async (e) => {
+        e.preventDefault();
+        setNewsPosting(true);
+        try {
+            const res = await fetch('http://localhost:5000/api/announcements/university', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ title: newsTitle, content: newsContent })
+            });
+            if (res.ok) {
+                alert('University News posted successfully!');
+                setNewsTitle('');
+                setNewsContent('');
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to post news');
+            }
+        } catch (error) {
+            console.error('Error posting news:', error);
+            alert('Error posting news');
+        } finally {
+            setNewsPosting(false);
+        }
+    };
+
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '2rem', paddingBottom: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '2rem' }}>
 
-            {/* Admin Stats Cards */}
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem' }}>
-                <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Courses</h3>
-                <div style={{ fontSize: '3.2rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1 }} className="text-gradient">{stats.totalCourses}</div>
-                <p style={{ fontSize: '0.95rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '2px 8px', borderRadius: '20px' }}>Active</span> In Database
-                </p>
-            </motion.div>
+            {/* Tab Navigation */}
+            <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem' }}>
+                <button
+                    onClick={() => setActiveTab('overview')}
+                    style={{
+                        background: 'transparent', border: 'none', padding: '0.5rem 1rem', fontSize: '1.1rem', fontWeight: 600, cursor: 'pointer',
+                        color: activeTab === 'overview' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                        borderBottom: activeTab === 'overview' ? '3px solid var(--color-primary)' : '3px solid transparent',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    Overview & Demand
+                </button>
+                <button
+                    onClick={() => setActiveTab('news')}
+                    style={{
+                        background: 'transparent', border: 'none', padding: '0.5rem 1rem', fontSize: '1.1rem', fontWeight: 600, cursor: 'pointer',
+                        color: activeTab === 'news' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                        borderBottom: activeTab === 'news' ? '3px solid var(--color-primary)' : '3px solid transparent',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    University News
+                </button>
+            </div>
 
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem' }}>
-                <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Phase</h3>
-                <div style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2, color: 'var(--color-primary)' }}>
-                    {adminPhase === 'PRE_ENROLLMENT' ? 'Pre-Enroll' : (adminPhase === 'ENROLLMENT' ? 'Active' : 'Closed')}
-                </div>
-                <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    System Enrollment State
-                </p>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem', background: stats.overSubscribed > 0 ? 'rgba(239, 68, 68, 0.9)' : 'var(--color-primary-dark)', color: 'white', border: 'none' }}>
-                <h3 style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Oversubscribed</h3>
-                <div style={{ fontSize: '3.2rem', fontWeight: 700, marginBottom: '0.5rem', color: 'white', lineHeight: 1 }}>{stats.overSubscribed}</div>
-                <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)' }}>Courses Need Capacity Review</p>
-            </motion.div>
-
-            {/* Admin Panel Controls Core */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-panel" style={{ gridColumn: 'span 12', padding: '2.5rem', border: '1px solid var(--color-primary)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <div>
-                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-primary)' }}>Faculty & Admin Controls</h3>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>Manage enrollment phases and view course demand analytics</p>
+            {activeTab === 'overview' && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '2rem' }}>
+                    {/* Admin Stats Cards */}
+                    <div className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem' }}>
+                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Courses</h3>
+                        <div style={{ fontSize: '3.2rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1 }} className="text-gradient">{stats.totalCourses}</div>
+                        <p style={{ fontSize: '0.95rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '2px 8px', borderRadius: '20px' }}>Active</span> In Database
+                        </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 600 }}>Modify Settings Phase:</span>
-                        <select
-                            value={adminPhase}
-                            onChange={(e) => {
-                                const newPhase = e.target.value;
-                                setConfirmPhaseModal({ show: true, newPhase });
-                            }}
-                            style={{ padding: '0.6rem 1rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
-                        >
-                            <option value="PRE_ENROLLMENT">Pre-Enrollment</option>
-                            <option value="ENROLLMENT">Active Enrollment</option>
-                            <option value="CLOSED">Closed</option>
-                        </select>
+
+                    <div className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem' }}>
+                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Phase</h3>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2, color: 'var(--color-primary)' }}>
+                            {adminPhase === 'PRE_ENROLLMENT' ? 'Pre-Enroll' : (adminPhase === 'ENROLLMENT' ? 'Active' : 'Closed')}
+                        </div>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            System Enrollment State
+                        </p>
                     </div>
-                </div>
 
-                <h4 style={{ fontWeight: 600, marginBottom: '1rem', fontSize: '1.1rem' }}>Course Demand Tracking</h4>
-                <div style={{ overflowX: 'auto', background: 'var(--color-bg-light)', borderRadius: '12px', padding: '1rem' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                        <thead>
-                            <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                <th style={{ padding: '0.8rem' }}>Course</th>
-                                <th style={{ padding: '0.8rem', textAlign: 'center' }}>Capacity</th>
-                                <th style={{ padding: '0.8rem', textAlign: 'center' }}>Pre-Enrolled</th>
-                                <th style={{ padding: '0.8rem', textAlign: 'center' }}>Waitlisted</th>
-                                <th style={{ padding: '0.8rem', textAlign: 'center' }}>Officially Enrolled</th>
-                                {/* Changed Action to suggest future course management */}
-                                <th style={{ padding: '0.8rem', textAlign: 'right' }}>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {demandData.map(course => {
-                                const c_cap = parseInt(course.capacity);
-                                const pre_en = parseInt(course.pre_enrolled_count);
-                                const isBottleneck = pre_en > c_cap;
-                                return (
-                                    <tr key={course.id} style={{ borderBottom: '1px solid var(--glass-border)', background: isBottleneck ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
-                                        <td style={{ padding: '0.8rem', fontWeight: 600 }}>{course.code} - {course.name}</td>
-                                        <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.capacity}</td>
-                                        <td style={{ padding: '0.8rem', textAlign: 'center', color: isBottleneck ? '#ef4444' : 'var(--color-text)', fontWeight: isBottleneck ? 700 : 500 }}>
-                                            {course.pre_enrolled_count} {isBottleneck && '⚠️'}
-                                        </td>
-                                        <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.waitlisted_count}</td>
-                                        <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.enrolled_count}</td>
-                                        <td style={{ padding: '0.8rem', textAlign: 'right' }}>
-                                            <button
-                                                onClick={async () => {
-                                                    const newCap = prompt(`Enter new capacity for ${course.code} (Current: ${course.capacity}):`, course.capacity);
-                                                    if (newCap && !isNaN(newCap)) {
-                                                        await fetch(`http://localhost:5000/api/admin/courses/${course.id}/capacity`, {
-                                                            method: 'PUT',
-                                                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                                                            body: JSON.stringify({ capacity: parseInt(newCap) })
-                                                        });
+                    <div className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem', background: stats.overSubscribed > 0 ? 'rgba(239, 68, 68, 0.9)' : 'var(--color-primary-dark)', color: 'white', border: 'none' }}>
+                        <h3 style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Oversubscribed</h3>
+                        <div style={{ fontSize: '3.2rem', fontWeight: 700, marginBottom: '0.5rem', color: 'white', lineHeight: 1 }}>{stats.overSubscribed}</div>
+                        <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)' }}>Courses Need Capacity Review</p>
+                    </div>
 
-                                                        // Refresh demand data
-                                                        const demandRes = await fetch('http://localhost:5000/api/admin/demand', { headers: { 'Authorization': `Bearer ${token}` } });
-                                                        if (demandRes.ok) {
-                                                            setDemandData(await demandRes.json());
-                                                        }
-                                                    }
-                                                }}
-                                                style={{ padding: '0.4rem 0.8rem', background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                Edit Cap
-                                            </button>
-                                        </td>
+                    {/* Admin Panel Controls Core */}
+                    <div className="glass-panel" style={{ gridColumn: 'span 12', padding: '2.5rem', border: '1px solid var(--color-primary)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-primary)' }}>Faculty & Admin Controls</h3>
+                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>Manage enrollment phases and view course demand analytics</p>
+                            </div>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                <span style={{ fontWeight: 600 }}>Modify Settings Phase:</span>
+                                <select
+                                    value={adminPhase}
+                                    onChange={(e) => {
+                                        const newPhase = e.target.value;
+                                        setConfirmPhaseModal({ show: true, newPhase });
+                                    }}
+                                    style={{ padding: '0.6rem 1rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
+                                >
+                                    <option value="PRE_ENROLLMENT">Pre-Enrollment</option>
+                                    <option value="ENROLLMENT">Active Enrollment</option>
+                                    <option value="CLOSED">Closed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h4 style={{ fontWeight: 600, marginBottom: '1rem', fontSize: '1.1rem' }}>Course Demand Tracking</h4>
+                        <div style={{ overflowX: 'auto', background: 'var(--color-bg-light)', borderRadius: '12px', padding: '1rem' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                <thead>
+                                    <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
+                                        <th style={{ padding: '0.8rem' }}>Course</th>
+                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>Capacity</th>
+                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>Pre-Enrolled</th>
+                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>Waitlisted</th>
+                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>Officially Enrolled</th>
+                                        {/* Changed Action to suggest future course management */}
+                                        <th style={{ padding: '0.8rem', textAlign: 'right' }}>Action</th>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            </motion.div>
+                                </thead>
+                                <tbody>
+                                    {demandData.map(course => {
+                                        const c_cap = parseInt(course.capacity);
+                                        const pre_en = parseInt(course.pre_enrolled_count);
+                                        const isBottleneck = pre_en > c_cap;
+                                        return (
+                                            <tr key={course.id} style={{ borderBottom: '1px solid var(--glass-border)', background: isBottleneck ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
+                                                <td style={{ padding: '0.8rem', fontWeight: 600 }}>{course.code} - {course.name}</td>
+                                                <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.capacity}</td>
+                                                <td style={{ padding: '0.8rem', textAlign: 'center', color: isBottleneck ? '#ef4444' : 'var(--color-text)', fontWeight: isBottleneck ? 700 : 500 }}>
+                                                    {course.pre_enrolled_count} {isBottleneck && '⚠️'}
+                                                </td>
+                                                <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.waitlisted_count}</td>
+                                                <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.enrolled_count}</td>
+                                                <td style={{ padding: '0.8rem', textAlign: 'right' }}>
+                                                    <button
+                                                        onClick={async () => {
+                                                            const newCap = prompt(`Enter new capacity for ${course.code} (Current: ${course.capacity}):`, course.capacity);
+                                                            if (newCap && !isNaN(newCap)) {
+                                                                await fetch(`http://localhost:5000/api/admin/courses/${course.id}/capacity`, {
+                                                                    method: 'PUT',
+                                                                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                                                    body: JSON.stringify({ capacity: parseInt(newCap) })
+                                                                });
+
+                                                                // Refresh demand data
+                                                                const demandRes = await fetch('http://localhost:5000/api/admin/demand', { headers: { 'Authorization': `Bearer ${token}` } });
+                                                                if (demandRes.ok) {
+                                                                    setDemandData(await demandRes.json());
+                                                                }
+                                                            }
+                                                        }}
+                                                        style={{ padding: '0.4rem 0.8rem', background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                        Edit Cap
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+
+            {activeTab === 'news' && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '2rem' }}>
+                    {/* University News Form */}
+                    <div className="glass-panel" style={{ gridColumn: 'span 12', padding: '2.5rem' }}>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>Post University News</h3>
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>Announcements posted here will appear on all student and staff dashboards.</p>
+                        <form onSubmit={handlePostNews}>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <input
+                                    type="text"
+                                    placeholder="News Headline"
+                                    value={newsTitle}
+                                    onChange={(e) => setNewsTitle(e.target.value)}
+                                    className="input-field"
+                                    required
+                                />
+                            </div>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <textarea
+                                    placeholder="News Content..."
+                                    value={newsContent}
+                                    onChange={(e) => setNewsContent(e.target.value)}
+                                    className="input-field"
+                                    rows="4"
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="btn btn-primary" disabled={newsPosting} style={{ padding: '0.8rem 2rem' }}>
+                                {newsPosting ? 'Posting...' : 'Publish News'}
+                            </button>
+                        </form>
+                    </div>
+                </motion.div>
+            )}
 
             {/* Confirmation Modal for Phase Change */}
             {confirmPhaseModal.show && (

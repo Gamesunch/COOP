@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Calendar, MapPin } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function StudentDashboard({ user, stats, todaySchedule }) {
+export default function StudentDashboard({ user, stats, todaySchedule, announcements }) {
     const { t } = useLanguage();
 
     return (
@@ -64,20 +64,30 @@ export default function StudentDashboard({ user, stats, todaySchedule }) {
             {/* Activity / Notifications */}
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '2.5rem' }}>
                 <h3 style={{ fontSize: '1.4rem', marginBottom: '2rem', fontWeight: 600 }}>{t('uni_news')}</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
-                    <div style={{ paddingBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)' }}>
-                        <div style={{ display: 'inline-block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.8rem', color: 'var(--color-secondary)', background: 'rgba(236,72,153,0.1)', padding: '0.3rem 0.8rem', borderRadius: '50px' }}>{t('event')}</div>
-                        <div style={{ fontSize: '1.15rem', marginBottom: '0.4rem', fontWeight: 500 }}>{t('news_1_title')}</div>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: 1.5 }}>{t('news_1_desc')}</div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '0.8rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <Calendar size={16} /> March 15, 2026
-                        </div>
-                    </div>
-                    <div>
-                        <div style={{ display: 'inline-block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.8rem', color: 'var(--color-primary)', background: 'rgba(139,92,246,0.1)', padding: '0.3rem 0.8rem', borderRadius: '50px' }}>{t('notice')}</div>
-                        <div style={{ fontSize: '1.15rem', marginBottom: '0.4rem', fontWeight: 500 }}>{t('news_2_title')}</div>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: 1.5 }}>{t('news_2_desc')}</div>
-                    </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem', maxHeight: '450px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                    {(!announcements || announcements.length === 0) ? (
+                        <p style={{ color: 'var(--color-text-muted)' }}>No recent news or announcements.</p>
+                    ) : (
+                        announcements.map((ann, idx) => {
+                            const isGlobal = !ann.course_id;
+                            const badgeColor = isGlobal ? 'var(--color-primary)' : 'var(--color-secondary)';
+                            const badgeBg = isGlobal ? 'rgba(139,92,246,0.1)' : 'rgba(236,72,153,0.1)';
+                            const badgeText = isGlobal ? 'University Notice' : ann.course_code;
+
+                            return (
+                                <div key={idx} style={{ paddingBottom: '1.5rem', borderBottom: idx !== announcements.length - 1 ? '1px solid var(--glass-border)' : 'none' }}>
+                                    <div style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.8rem', color: badgeColor, background: badgeBg, padding: '0.3rem 0.8rem', borderRadius: '50px' }}>
+                                        {badgeText}
+                                    </div>
+                                    <div style={{ fontSize: '1.15rem', marginBottom: '0.4rem', fontWeight: 500 }}>{ann.title}</div>
+                                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{ann.content}</div>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '0.8rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                        <Calendar size={14} /> {new Date(ann.created_at).toLocaleDateString()}
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
             </motion.div>
         </div>

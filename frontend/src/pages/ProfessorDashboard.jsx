@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Users, BookOpen, Clock } from 'lucide-react';
+import { Calendar, MapPin, Search, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import html2canvas from 'html2canvas';
 
 const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
@@ -39,32 +41,44 @@ function parseSchedule(scheduleTime) {
 
 export default function ProfessorDashboard() {
     const navigate = useNavigate();
+    const { t } = useLanguage();
+    const [user, setUser] = useState(null);
     const [courses, setCourses] = useState([]);
+    const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
     const timetableRef = useRef(null);
 
     useEffect(() => {
-        const fetchCourses = async () => {
+        const fetchDashboardData = async () => {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     navigate('/login');
                     return;
                 }
-                const res = await fetch('http://localhost:5000/api/courses/professor', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setCourses(data);
+                const cachedUser = JSON.parse(localStorage.getItem('user'));
+                if (cachedUser) {
+                    setUser(cachedUser);
+                }
+
+                const [coursesRes, announcementsRes] = await Promise.all([
+                    fetch('http://localhost:5000/api/courses/professor', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('http://localhost:5000/api/announcements/professor', { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                if (coursesRes.ok) {
+                    setCourses(await coursesRes.json());
+                }
+                if (announcementsRes.ok) {
+                    setAnnouncements(await announcementsRes.json());
                 }
             } catch (error) {
-                console.error('Error fetching professor courses:', error);
+                console.error('Error fetching dashboard data:', error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchCourses();
+        fetchDashboardData();
     }, [navigate]);
 
     const handleDownloadTimetable = async () => {
@@ -82,7 +96,7 @@ export default function ProfessorDashboard() {
         return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}>Loading...</div>;
     }
 
-    const totalStudentsCapacity = courses.reduce((sum, c) => sum + (c.capacity || 0), 0);
+    const totalStudentsEnrolled = courses.reduce((sum, c) => sum + (parseInt(c.enrolled_count) || 0), 0);
     const totalClasses = courses.length;
 
     const dayOfWeek = new Date().toLocaleDateString('en-US', { weekday: 'short' }); // "Mon", "Tue"
@@ -104,12 +118,38 @@ export default function ProfessorDashboard() {
     });
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg)' }}>
+        <div style={{ display: 'flex', height: '100vh', background: 'var(--color-bg-dark)', overflow: 'hidden' }}>
             <Sidebar activePath="/professor/dashboard" />
-            <main style={{ flex: 1, padding: '2rem 3rem', overflowY: 'auto' }}>
-                <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ marginBottom: '2.5rem' }}>
-                    <h1 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0, color: 'var(--color-text)' }}>Professor Dashboard</h1>
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', marginTop: '0.5rem' }}>Overview of your teaching schedule and class capacities.</p>
+            <main style={{ flex: 1, padding: '2rem 3rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+                <motion.header
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}
+                >
+                    <div>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0, color: 'var(--color-text)' }}>Professor Dashboard</h1>
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', marginTop: '0.5rem' }}>Overview of your teaching schedule and class capacities.</p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                        <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', padding: '0.6rem 1.2rem', borderRadius: '50px', background: 'var(--color-bg-light)' }}>
+                            <Search size={18} color="var(--color-text-muted)" />
+                            <input type="text" placeholder={t('search_placeholder')} style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--color-text)', marginLeft: '0.8rem', padding: '0.2rem', fontFamily: 'var(--font-main)', fontSize: '0.95rem' }} />
+                        </div>
+                        <LanguageSwitcher />
+                        <motion.button whileHover={{ scale: 1.1 }} className="glass-panel" style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: 'none', color: 'var(--color-text)', cursor: 'pointer', position: 'relative', background: 'var(--color-bg-light)' }}>
+                            <Bell size={20} />
+                            <span style={{ position: 'absolute', top: '12px', right: '12px', width: '10px', height: '10px', background: '#ef4444', borderRadius: '50%', border: '2px solid var(--color-bg-light)' }}></span>
+                        </motion.button>
+                        {user?.profilePictureUrl ? (
+                            <img src={`http://localhost:5000${user.profilePictureUrl}`} alt="Profile" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)', cursor: 'pointer' }} />
+                        ) : (
+                            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-primary-dark)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(217, 121, 4, 0.3)', cursor: 'pointer' }}>
+                                {user?.firstName ? user.firstName[0].toUpperCase() : 'U'}
+                            </div>
+                        )}
+                    </div>
                 </motion.header>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '2rem', paddingBottom: '2rem' }}>
@@ -121,9 +161,9 @@ export default function ProfessorDashboard() {
                     </motion.div>
 
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '2rem' }}>
-                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Capacity</h3>
-                        <div style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1, color: '#10b981' }}>{totalStudentsCapacity}</div>
-                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>Maximum students</p>
+                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Students</h3>
+                        <div style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1, color: '#10b981' }}>{totalStudentsEnrolled}</div>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>Currently enrolled across all classes</p>
                     </motion.div>
 
                     {/* Today's Schedule Mini-View */}
@@ -142,6 +182,25 @@ export default function ProfessorDashboard() {
                                                 <MapPin size={12} /> {course.room || 'TBA'}
                                             </div>
                                         </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </motion.div>
+
+                    {/* Recent Announcements */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="glass-panel" style={{ gridColumn: 'span 12', padding: '2.5rem' }}>
+                        <h3 style={{ color: 'var(--color-text)', fontSize: '1.2rem', marginBottom: '1.5rem', fontWeight: 600 }}>Recent Announcements</h3>
+                        <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                            {announcements.length === 0 ? (
+                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>No announcements posted yet.</p>
+                            ) : (
+                                announcements.map(ann => (
+                                    <div key={ann.id} style={{ minWidth: '300px', maxWidth: '300px', padding: '1.2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <div style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-primary)', background: 'rgba(242, 159, 5, 0.12)', padding: '2px 8px', borderRadius: '4px', marginBottom: '0.5rem' }}>{ann.course_code}</div>
+                                        <h4 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ann.title}</h4>
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '0.8rem' }}>{ann.content}</p>
+                                        <small style={{ color: 'var(--color-text-muted)', opacity: 0.7, fontSize: '0.75rem' }}>{new Date(ann.created_at).toLocaleDateString()}</small>
                                     </div>
                                 ))
                             )}

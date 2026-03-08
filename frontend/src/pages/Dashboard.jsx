@@ -14,6 +14,7 @@ export default function Dashboard() {
     const [user, setUser] = useState(null);
     const [stats, setStats] = useState({ credits: 0, pending: 0, gpa: 'N/A' });
     const [todaySchedule, setTodaySchedule] = useState([]);
+    const [announcements, setAnnouncements] = useState([]);
     const [adminPhase, setAdminPhase] = useState('ENROLLMENT');
 
     useEffect(() => {
@@ -110,6 +111,14 @@ export default function Dashboard() {
 
                         setStats({ credits: totalCredits, pending: waitlistedCount, gpa: calcGpa });
                     }
+
+                    // Fetch student announcements
+                    const annRes = await fetch('http://localhost:5000/api/announcements/student', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (annRes.ok) {
+                        setAnnouncements(await annRes.json());
+                    }
                 }
 
                 if (currentUser && (currentUser.role === 'ADMIN' || currentUser.role === 'PROFESSOR')) {
@@ -183,6 +192,7 @@ export default function Dashboard() {
                         user={user}
                         stats={stats}
                         todaySchedule={todaySchedule}
+                        announcements={announcements}
                     />
                 )}
 

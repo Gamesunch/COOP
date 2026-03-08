@@ -27,10 +27,11 @@ exports.getProfessorCourses = async (req, res) => {
         const result = await db.query(`
             SELECT c.*, 
                 COALESCE(
-                    json_agg(
-                        json_build_object('id', u.id, 'first_name', u.first_name, 'last_name', u.last_name)
+                    json_agg(DISTINCT
+                        jsonb_build_object('id', u.id, 'first_name', u.first_name, 'last_name', u.last_name)
                     ) FILTER (WHERE u.id IS NOT NULL), 
-                '[]') as professors
+                '[]') as professors,
+                (SELECT COUNT(*) FROM enrollments e WHERE e.course_id = c.id AND e.status = 'ENROLLED') as enrolled_count
             FROM courses c
             JOIN course_professors my_cp ON c.id = my_cp.course_id AND my_cp.professor_id = $1
             LEFT JOIN course_professors cp ON c.id = cp.course_id

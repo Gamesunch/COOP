@@ -258,11 +258,11 @@ export default function ProfessorClassDetails() {
                             <div>
                                 <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Recent Announcements</h3>
                                 {loadingAnn ? <p>Loading announcements...</p> : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '450px', overflowY: 'auto', paddingRight: '0.5rem' }}>
                                         {announcements.length === 0 ? <p style={{ color: 'var(--color-text-muted)' }}>No announcements posted yet.</p> : announcements.map(ann => (
                                             <div key={ann.id} className="glass-panel" style={{ padding: '1.2rem' }}>
-                                                <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{ann.title}</h4>
-                                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '0.8rem' }}>{ann.content}</p>
+                                                <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--color-primary)' }}>{ann.title}</h4>
+                                                <p style={{ color: 'var(--color-text)', fontSize: '0.95rem', marginBottom: '0.8rem', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{ann.content}</p>
                                                 <small style={{ color: 'var(--color-text-muted)', opacity: 0.7 }}>
                                                     Posted on {new Date(ann.created_at).toLocaleDateString()}
                                                 </small>
