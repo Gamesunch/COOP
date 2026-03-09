@@ -12,17 +12,18 @@ RegisSPHERE is a modern, comprehensive student portal and university management 
 ## Core Features
 
 - **Dynamic Localization**: Built-in, instant switching between English and Thai languages across the entire application interface.
-- **Secure Authentication**: Robust user registration and login flows utilizing JWT for session management and Bcrypt for password hashing. Includes specific Student, Professor, and Admin roles.
-- **Student Dashboard**: A central hub providing an overview of the student's status with quick navigation to primary academic modules.
-- **Professor Portal**: Dedicated dashboard for professors to view their assigned courses, manage class rosters, and oversee course details.
-- **University News & Announcements**: Global university news system alongside course-specific announcement feeds to keep students and staff informed.
+- **Secure Authentication & RBAC**: Robust user registration and login flows utilizing JWT for session management and Bcrypt for password hashing. Includes specific Student, Professor, and Admin roles.
+- **Admin Control Panel**: Comprehensive dashboard for administrators to oversee system operations, manage user accounts, construct the course catalog, and broadcast university-wide news.
+- **Student Dashboard**: A central hub providing an overview of the student's status with quick navigation to primary academic modules and an aggregated news feed.
+- **Professor Portal & Grading**: Dedicated dashboard for professors to view their assigned courses, assign grades to students, download class rosters as CSV files, and post course-specific updates.
+- **University News & Announcements**: Global university news board alongside course-specific announcement feeds to keep students and staff informed.
 - **Profile Management**: A dedicated settings module allowing users to upload custom profile pictures safely and edit biographical details.
 - **Course Enrollment**: An interactive catalog allowing students to search for available courses, view detailed metrics (credits, schedules, capacity, professor), and manage live enrollments or drops.
 - **Academic Scheduling**: A detailed "My Courses" interface segmented into logical tabs:
     - **Enrolled Courses**: Overview of current enrollments.
     - **Study Timetable**: An automatically generated, visual grid calendar of the student's week, complete with a functionality to export the timetable as a PNG image.
     - **Exam Schedule**: Clear breakdowns of midterm and final exam dates for enrolled subjects.
-- **Grades and Progress Tracking**: A dedicated module to view academic results, offering sorting by Academic Year, visual grade badges, and automatic calculations for Semester GPA and Cumulative GPAX.
+- **Grades and Progress Tracking**: A dedicated module for students to view academic results, offering sorting by Academic Year, visual grade badges, and automatic calculations for Semester GPA and Cumulative GPAX.
 - **Modern Minimalist Interface**: Clean UI built on a unified color system, leveraging Framer Motion for sophisticated animations and glassmorphism principles.
 
 ## Technology Stack
