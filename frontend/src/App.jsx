@@ -11,6 +11,7 @@ import StudentManagement from './pages/StudentManagement';
 import ProfessorDashboard from './pages/ProfessorDashboard';
 import ProfessorCourses from './pages/ProfessorCourses';
 import ProfessorClassDetails from './pages/ProfessorClassDetails';
+import StudyPath from './pages/StudyPath';
 import { LanguageProvider } from './context/LanguageContext';
 import './index.css';
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/enrollment" element={<Enrollment />} />
+          <Route path="/study-path" element={<StudyPath />} />
           <Route path="/my-courses" element={<MyCourses />} />
           <Route path="/grades" element={<Grades />} />
           <Route path="/admin/courses" element={<CourseManagement />} />

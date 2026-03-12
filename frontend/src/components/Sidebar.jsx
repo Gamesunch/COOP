@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Award } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Award, Layers } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -58,7 +58,10 @@ export default function Sidebar({ activePath }) {
         navItems = [
             { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
             { icon: BookOpen, label: t('my_courses'), path: '/my-courses' },
-            ...(phase !== 'CLOSED' ? [{ icon: Users, label: t('enrollment'), path: '/enrollment' }] : []),
+            ...(phase !== 'CLOSED' ? [
+                { icon: Users, label: t('enrollment'), path: '/enrollment' },
+                { icon: Layers, label: 'Study Path', path: '/study-path' }
+            ] : []),
             { icon: Award, label: t('grades'), path: '/grades' },
             { icon: Settings, label: t('settings'), path: '/settings' }
         ];

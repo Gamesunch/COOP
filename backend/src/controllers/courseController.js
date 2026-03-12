@@ -5,15 +5,21 @@ exports.getAllCourses = async (req, res) => {
         const result = await db.query(`
             SELECT c.*, 
                 COALESCE(
-                    json_agg(
-                        json_build_object('id', u.id, 'first_name', u.first_name, 'last_name', u.last_name)
+                    json_agg(DISTINCT
+                        jsonb_build_object('id', u.id, 'first_name', u.first_name, 'last_name', u.last_name)
                     ) FILTER (WHERE u.id IS NOT NULL), 
-                '[]') as professors
+                '[]') as professors,
+                COALESCE(
+                    (SELECT json_agg(jsonb_build_object('id', p.prerequisite_id, 'code', pc.code))
+                     FROM course_prerequisites p
+                     JOIN courses pc ON p.prerequisite_id = pc.id
+                     WHERE p.course_id = c.id),
+                '[]') as prerequisites
             FROM courses c 
             LEFT JOIN course_professors cp ON c.id = cp.course_id
             LEFT JOIN users u ON cp.professor_id = u.id
             GROUP BY c.id
-            ORDER BY c.created_at DESC
+            ORDER BY c.semester_number ASC, c.code ASC
         `);
         res.json(result.rows);
     } catch (error) {

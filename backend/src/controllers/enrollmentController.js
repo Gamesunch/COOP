@@ -27,7 +27,38 @@ exports.enrollCourse = async (req, res) => {
             }
         }
 
-        // 2. Simplistic Time conflict check
+        // 2. NEW: Prerequisite Check
+        const prereqsRes = await db.query(
+            `SELECT p.prerequisite_id, c.name, c.code 
+             FROM course_prerequisites p
+             JOIN courses c ON p.prerequisite_id = c.id
+             WHERE p.course_id = $1`,
+            [course_id]
+        );
+
+        if (prereqsRes.rows.length > 0) {
+            const prereqIds = prereqsRes.rows.map(r => r.prerequisite_id);
+            const passedPrereqsRes = await db.query(
+                `SELECT course_id FROM enrollments 
+                 WHERE student_id = $1 
+                 AND course_id = ANY($2::uuid[]) 
+                 AND status = 'ENROLLED' 
+                 AND grade IS NOT NULL 
+                 AND grade NOT IN ('F', 'W')`,
+                [student_id, prereqIds]
+            );
+
+            if (passedPrereqsRes.rows.length < prereqIds.length) {
+                const passedIds = passedPrereqsRes.rows.map(r => r.course_id);
+                const missingPrereqs = prereqsRes.rows.filter(r => !passedIds.includes(r.prerequisite_id));
+                return res.status(403).json({
+                    error: `Missing prerequisites: ${missingPrereqs.map(p => `${p.code} ${p.name}`).join(', ')}`,
+                    missingPrereqs
+                });
+            }
+        }
+
+        // 3. Simplistic Time conflict check
         const currentCourses = await db.query(
             `SELECT c.schedule_time 
        FROM enrollments e
