@@ -4,8 +4,11 @@ import { BookOpen, CheckCircle, Lock, Play, Layers, Send, Clock, MapPin, Filter 
 import Sidebar from '../components/Sidebar';
 
 const API_BASE = 'http://localhost:5000';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function StudyPath() {
+    const { t } = useLanguage();
     const [courses, setCourses] = useState([]);
     const [myEnrollments, setMyEnrollments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -133,13 +136,13 @@ export default function StudyPath() {
             });
             const data = await res.json();
             if (res.ok) {
-                alert('Successfully enrolled!');
+                alert(t('successfully_enrolled'));
                 fetchData();
             } else {
-                alert(data.error || 'Enrollment failed');
+                alert(data.error || t('enrollment_failed'));
             }
         } catch (err) {
-            alert('Server error during enrollment');
+            alert(t('server_error_enrollment'));
         }
         setEnrollingId(null);
     };
@@ -170,6 +173,10 @@ export default function StudyPath() {
         return 'READY';
     };
 
+    const getStatusText = (status) => {
+        return t(status.toLowerCase());
+    };
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'COMPLETED': return '#10b981';
@@ -190,7 +197,7 @@ export default function StudyPath() {
         }
     };
 
-    if (loading) return <div className="flex-center" style={{ height: '100vh', color: 'white' }}>Loading Curriculum...</div>;
+    if (loading) return <div className="flex-center" style={{ height: '100vh', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{t('loading_curriculum')}</div>;
 
     return (
         <div style={{ display: 'flex', width: '100%', minHeight: '100vh', background: 'var(--color-bg-dark)' }}>
@@ -215,17 +222,20 @@ export default function StudyPath() {
                     <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                         <div>
                             <h1 style={{ fontSize: '2.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Layers className="text-primary" /> Study Path Guidance
+                                <Layers className="text-primary" /> {t('study_path_title')}
                             </h1>
-                            <p style={{ color: 'var(--color-text-muted)' }}>Computer Science Program (2564 Revision)</p>
+                            <p style={{ color: 'var(--color-text-muted)' }}>{t('cs_program')}</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <LanguageSwitcher />
                         </div>
                         
                         {/* Track Selector */}
                         <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            {tracks.map(t => (
+                            {tracks.map(trackItem => (
                                 <button
-                                    key={t}
-                                    onClick={() => setSelectedTrack(t)}
+                                    key={trackItem}
+                                    onClick={() => setSelectedTrack(trackItem)}
                                     style={{
                                         padding: '6px 12px',
                                         borderRadius: '8px',
@@ -233,16 +243,16 @@ export default function StudyPath() {
                                         fontSize: '0.75rem',
                                         fontWeight: 700,
                                         cursor: 'pointer',
-                                        background: selectedTrack === t ? 'var(--color-primary)' : 'transparent',
-                                        color: selectedTrack === t ? 'white' : 'var(--color-text-muted)',
+                                        background: selectedTrack === trackItem ? 'var(--color-primary)' : 'transparent',
+                                        color: selectedTrack === trackItem ? 'white' : 'var(--color-text-muted)',
                                         transition: 'all 0.2s ease',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '6px'
                                     }}
                                 >
-                                    {t === 'ALL' ? <Filter size={12} /> : null}
-                                    {t}
+                                    {trackItem === 'ALL' ? <Filter size={12} /> : null}
+                                    {t(trackItem.toLowerCase())}
                                 </button>
                             ))}
                         </div>
@@ -292,7 +302,7 @@ export default function StudyPath() {
                                     border: `1px solid ${year.color}33`,
                                     borderBottom: 'none'
                                 }}>
-                                    {year.label}
+                                    {year.label.startsWith('YEAR') ? `${t('year')} ${year.label.split(' ')[1]}` : t(year.label.toLowerCase())}
                                 </div>
                             ))}
                         </div>
@@ -312,7 +322,7 @@ export default function StudyPath() {
                                         border: '1px solid rgba(255,255,255,0.05)',
                                         color: 'var(--color-text-muted)'
                                     }}>
-                                        SEM {sem}
+                                        {t('semester')} {sem}
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                                         <AnimatePresence mode="popLayout">
@@ -347,7 +357,7 @@ export default function StudyPath() {
                                                             {course.code}
                                                         </span>
                                                         <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-muted)' }}>
-                                                            {course.credits} Cr.
+                                                            {course.credits} {t('credits_abbr')}
                                                         </span>
                                                     </div>
                                                     
@@ -368,7 +378,7 @@ export default function StudyPath() {
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
                                                         <div style={{ color: color, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 700 }}>
                                                             {getStatusIcon(status)}
-                                                            {status}
+                                                            {getStatusText(status)}
                                                         </div>
 
                                                         {status === 'LOCKED' && course.prerequisites?.length > 0 && (
@@ -408,7 +418,7 @@ export default function StudyPath() {
                                                                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
                                                                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                                                             >
-                                                                {enrollingId === course.id ? '...' : <><Send size={12} /> Enroll</>}
+                                                                {enrollingId === course.id ? t('enrolling') : <><Send size={12} /> {t('enroll_btn')}</>}
                                                             </button>
                                                         )}
                                                     </div>

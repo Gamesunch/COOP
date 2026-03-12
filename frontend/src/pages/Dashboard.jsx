@@ -16,6 +16,7 @@ export default function Dashboard() {
     const [todaySchedule, setTodaySchedule] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
     const [adminPhase, setAdminPhase] = useState('ENROLLMENT');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -132,12 +133,25 @@ export default function Dashboard() {
             } catch (err) {
                 console.error("Dashboard mount error", err);
                 navigate('/login');
+            } finally {
+                setLoading(false); // Set loading to false after fetch attempt
             }
         };
         fetchData();
     }, [navigate]);
 
-    if (!user) return <div className="flex-center" style={{ height: '100vh', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{t('loading')}</div>;
+    if (loading) {
+        return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}>{t('loading')}</div>;
+    }
+
+    // If not loading but user is still null (e.g., failed to fetch user), redirect or show error
+    if (!user) {
+        // This case should ideally be handled by the fetchData's catch block navigating to login
+        // but as a fallback, we can show a generic error or redirect.
+        // For now, let's just show a loading message, though it implies an issue if loading is false.
+        // A better approach might be to have an error state.
+        return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}>{t('error_loading_user_data')}</div>;
+    }
 
     return (
         <div style={{ display: 'flex', height: '100vh', background: 'var(--color-bg-dark)', overflow: 'hidden' }}>
@@ -156,7 +170,7 @@ export default function Dashboard() {
                     style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}
                 >
                     <div>
-                        <h1 style={{ fontSize: '2.2rem', marginBottom: '0.3rem', fontWeight: 600 }}>{t('welcome_back')}, {user.firstName || (user.role === 'ADMIN' ? 'Admin' : t('student_role_display'))}</h1>
+                        <h1 style={{ fontSize: '2.2rem', marginBottom: '0.3rem', fontWeight: 600 }}>{t('welcome_back')}, {user.firstName || (user.role === 'ADMIN' ? t('admin_role_display') : t('student_role_display'))}</h1>
                         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('academic_overview')}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>

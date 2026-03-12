@@ -69,7 +69,7 @@ export default function Settings() {
             });
             if (res.ok) {
                 const data = await res.json();
-                setMessage('Saved!');
+                setMessage(t('saved'));
                 // Update localStorage with new data
                 const stored = JSON.parse(localStorage.getItem('user'));
                 localStorage.setItem('user', JSON.stringify({ ...stored, bio: data.user.bio }));
@@ -77,7 +77,7 @@ export default function Settings() {
             }
         } catch (err) {
             console.error('Error saving profile:', err);
-            setMessage('Error saving');
+            setMessage(t('error_saving') || 'Error saving');
         }
         setSaving(false);
     };
@@ -105,14 +105,14 @@ export default function Settings() {
                 // Update localStorage
                 const stored = JSON.parse(localStorage.getItem('user'));
                 localStorage.setItem('user', JSON.stringify({ ...stored, profilePictureUrl: data.profilePictureUrl }));
-                setMessage('Picture uploaded!');
+                setMessage(t('upload_success'));
                 setTimeout(() => setMessage(''), 3000);
             } else {
-                setMessage('Upload failed');
+                setMessage(t('upload_error'));
             }
         } catch (err) {
             console.error('Error uploading picture:', err);
-            setMessage('Upload error');
+            setMessage(t('upload_error'));
         }
         setUploading(false);
     };
@@ -208,7 +208,7 @@ export default function Settings() {
                                     style={{ background: 'var(--color-surface-hover)', padding: '0.6rem 1.2rem', fontSize: '0.9rem', border: '1px solid var(--glass-border)', color: 'var(--color-text)' }}
                                     disabled={uploading}
                                 >
-                                    {uploading ? 'Uploading...' : t('upload_photo')}
+                                    {uploading ? t('uploading') : t('upload_photo')}
                                 </button>
                             </div>
                         </div>
@@ -241,7 +241,7 @@ export default function Settings() {
                             style={{ marginTop: '1rem', width: '100%', padding: '1rem' }}
                             disabled={saving}
                         >
-                            {saving ? 'Saving...' : t('save_changes')}
+                            {saving ? t('saving') : t('save_changes')}
                         </button>
                     </motion.div>
 

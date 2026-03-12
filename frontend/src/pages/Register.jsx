@@ -25,7 +25,7 @@ export default function Register() {
         setErrorMsg('');
 
         if (password !== confirmPassword) {
-            return setErrorMsg('Passwords do not match');
+            return setErrorMsg(t('passwords_not_match'));
         }
 
         try {
@@ -38,7 +38,7 @@ export default function Register() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Registration failed');
+                throw new Error(data.error || t('registration_failed'));
             }
 
             // Redirect to login after successful registration

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Award, Layers } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Sidebar({ activePath }) {
     const navigate = useNavigate();
@@ -44,14 +45,14 @@ export default function Sidebar({ activePath }) {
     if (userRole === 'ADMIN') {
         navItems = [
             { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
-            { icon: BookOpen, label: 'Manage Courses', path: '/admin/courses' },
-            { icon: Users, label: 'Student Users', path: '/admin/students' },
+            { icon: BookOpen, label: t('course_mgmt_title'), path: '/admin/courses' },
+            { icon: Users, label: t('student_mgmt_title'), path: '/admin/students' },
             { icon: Settings, label: t('settings'), path: '/settings' }
         ];
     } else if (userRole === 'PROFESSOR') {
         navItems = [
             { icon: LayoutDashboard, label: t('overview'), path: '/professor/dashboard' },
-            { icon: BookOpen, label: 'My Classes', path: '/professor/courses' },
+            { icon: BookOpen, label: t('my_classes'), path: '/professor/courses' },
             { icon: Settings, label: t('settings'), path: '/settings' }
         ];
     } else {
@@ -60,7 +61,7 @@ export default function Sidebar({ activePath }) {
             { icon: BookOpen, label: t('my_courses'), path: '/my-courses' },
             ...(phase !== 'CLOSED' ? [
                 { icon: Users, label: t('enrollment'), path: '/enrollment' },
-                { icon: Layers, label: 'Study Path', path: '/study-path' }
+                { icon: Layers, label: t('study_path_title'), path: '/study-path' }
             ] : []),
             { icon: Award, label: t('grades'), path: '/grades' },
             { icon: Settings, label: t('settings'), path: '/settings' }
@@ -124,7 +125,8 @@ export default function Sidebar({ activePath }) {
                 })}
             </nav>
 
-            <div style={{ marginTop: 'auto', padding: '0 1rem' }}>
+            <div style={{ marginTop: 'auto', padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <LanguageSwitcher style={{ width: '100%', justifyContent: 'center' }} />
                 <motion.button
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(244, 63, 94, 0.2)' }}
                     whileTap={{ scale: 0.98 }}

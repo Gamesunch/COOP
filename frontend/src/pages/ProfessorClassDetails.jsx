@@ -3,8 +3,11 @@ import Sidebar from '../components/Sidebar';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Download, Save } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function ProfessorClassDetails() {
+    const { t } = useLanguage();
     const { courseId } = useParams();
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -95,11 +98,11 @@ export default function ProfessorClassDetails() {
                 setGradeInput('');
             } else {
                 const data = await res.json();
-                alert(data.error || 'Failed to update grade');
+                alert(data.error || t('failed_update_grade'));
             }
         } catch (error) {
             console.error('Error updating grade:', error);
-            alert('Error updating grade');
+            alert(t('failed_update_grade'));
         }
     };
 
@@ -122,11 +125,11 @@ export default function ProfessorClassDetails() {
                 fetchAnnouncements();
             } else {
                 const data = await res.json();
-                alert(data.error || 'Failed to post announcement');
+                alert(data.error || t('failed_post_announcement'));
             }
         } catch (error) {
             console.error('Error posting announcement:', error);
-            alert('Error posting announcement');
+            alert(t('failed_post_announcement'));
         }
     };
 
@@ -137,25 +140,28 @@ export default function ProfessorClassDetails() {
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                     <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                         <div>
-                            <h1 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0 }}>Class Details</h1>
-                            <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', marginTop: '0.5rem' }}>Manage enrolled students and grades</p>
+                            <h1 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0 }}>{t('class_details_title')}</h1>
+                            <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', marginTop: '0.5rem' }}>{t('manage_students_desc')}</p>
                         </div>
-                        <button className="btn btn-primary" onClick={handleDownload} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Download size={18} /> Download CSV
-                        </button>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <LanguageSwitcher />
+                            <button className="btn btn-primary" onClick={handleDownload} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Download size={18} /> {t('download_csv')}
+                            </button>
+                        </div>
                     </header>
                     {loading ? (
-                        <p>Loading students...</p>
+                        <p>{t('loading')}</p>
                     ) : (
                         <div className="glass-panel" style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--color-text-muted)' }}>ID</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--color-text-muted)' }}>Name</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--color-text-muted)' }}>Major</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--color-text-muted)' }}>Status</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--color-text-muted)' }}>Actions</th>
+                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--color-text-muted)' }}>{t('student_id')}</th>
+                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--color-text-muted)' }}>{t('name')}</th>
+                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--color-text-muted)' }}>{t('major')}</th>
+                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--color-text-muted)' }}>{t('status')}</th>
+                                        <th style={{ padding: '1rem', textAlign: 'left', color: 'var(--color-text-muted)' }}>{t('actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -174,7 +180,7 @@ export default function ProfessorClassDetails() {
                                                             className="input-field"
                                                             style={{ padding: '0.3rem', width: '80px', marginBottom: 0 }}
                                                         >
-                                                            <option value="">Select</option>
+                                                            <option value="">{t('select_grade')}</option>
                                                             <option value="A">A</option>
                                                             <option value="B+">B+</option>
                                                             <option value="B">B</option>
@@ -196,18 +202,18 @@ export default function ProfessorClassDetails() {
                                                             onClick={() => setGradingRowId(null)}
                                                             style={{ padding: '0.4rem 0.6rem', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
                                                         >
-                                                            Cancel
+                                                            {t('cancel')}
                                                         </button>
                                                     </div>
                                                 ) : (
                                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                                        <span style={{ fontWeight: 600 }}>{student.grade || 'N/A'}</span>
+                                                        <span style={{ fontWeight: 600 }}>{student.grade || t('not_available')}</span>
                                                         <button
                                                             className="btn"
                                                             onClick={() => { setGradingRowId(student.enrollment_id); setGradeInput(student.grade || ''); }}
                                                             style={{ background: 'rgba(255,255,255,0.1)', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
                                                         >
-                                                            Edit Grade
+                                                            {t('edit_grade')}
                                                         </button>
                                                     </div>
                                                 )}
@@ -217,7 +223,7 @@ export default function ProfessorClassDetails() {
                                     {students.length === 0 && (
                                         <tr>
                                             <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
-                                                No students enrolled yet.
+                                                {t('no_students_enrolled')}
                                             </td>
                                         </tr>
                                     )}
@@ -227,15 +233,15 @@ export default function ProfessorClassDetails() {
                     )}
 
                     <div style={{ marginTop: '3rem' }}>
-                        <h2 style={{ fontSize: '1.8rem', fontWeight: 600, marginBottom: '1.5rem' }}>Announcements</h2>
+                        <h2 style={{ fontSize: '1.8rem', fontWeight: 600, marginBottom: '1.5rem' }}>{t('announcements')}</h2>
                         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1fr)', gap: '2rem' }}>
                             <div>
-                                <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Post New Announcement</h3>
+                                <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>{t('post_new_announcement')}</h3>
                                 <form onSubmit={handlePostAnnouncement} className="glass-panel" style={{ padding: '1.5rem' }}>
                                     <div className="form-group" style={{ marginBottom: '1rem' }}>
                                         <input
                                             type="text"
-                                            placeholder="Announcement Title"
+                                            placeholder={t('announcement_title_label')}
                                             value={newAnnTitle}
                                             onChange={(e) => setNewAnnTitle(e.target.value)}
                                             className="input-field"
@@ -244,7 +250,7 @@ export default function ProfessorClassDetails() {
                                     </div>
                                     <div className="form-group" style={{ marginBottom: '1rem' }}>
                                         <textarea
-                                            placeholder="Announcement Content"
+                                            placeholder={t('announcement_content_label')}
                                             value={newAnnContent}
                                             onChange={(e) => setNewAnnContent(e.target.value)}
                                             className="input-field"
@@ -252,19 +258,19 @@ export default function ProfessorClassDetails() {
                                             required
                                         />
                                     </div>
-                                    <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Post Announcement</button>
+                                    <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>{t('post_announcement_btn')}</button>
                                 </form>
                             </div>
                             <div>
-                                <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Recent Announcements</h3>
-                                {loadingAnn ? <p>Loading announcements...</p> : (
+                                <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>{t('recent_announcements')}</h3>
+                                {loadingAnn ? <p>{t('loading_announcements')}</p> : (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '450px', overflowY: 'auto', paddingRight: '0.5rem' }}>
-                                        {announcements.length === 0 ? <p style={{ color: 'var(--color-text-muted)' }}>No announcements posted yet.</p> : announcements.map(ann => (
+                                        {announcements.length === 0 ? <p style={{ color: 'var(--color-text-muted)' }}>{t('no_announcements_posted')}</p> : announcements.map(ann => (
                                             <div key={ann.id} className="glass-panel" style={{ padding: '1.2rem' }}>
                                                 <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--color-primary)' }}>{ann.title}</h4>
                                                 <p style={{ color: 'var(--color-text)', fontSize: '0.95rem', marginBottom: '0.8rem', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{ann.content}</p>
                                                 <small style={{ color: 'var(--color-text-muted)', opacity: 0.7 }}>
-                                                    Posted on {new Date(ann.created_at).toLocaleDateString()}
+                                                    {t('posted_on')} {new Date(ann.created_at).toLocaleDateString()}
                                                 </small>
                                             </div>
                                         ))}

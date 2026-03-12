@@ -56,7 +56,7 @@ export default function StudentManagement() {
         if (students.length === 0) return;
 
         // Define CSV headers
-        const headers = ['Student ID', 'First Name', 'Last Name', 'Email', 'University', 'Major', 'Year of Study', 'Joined'];
+        const headers = [t('student_id'), t('first_name'), t('last_name'), t('email'), t('university'), t('major'), t('year_of_study'), t('joined')];
 
         // Convert rows
         const csvRows = students.map(s => {
@@ -101,8 +101,8 @@ export default function StudentManagement() {
                     style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}
                 >
                     <div>
-                        <h1 style={{ fontSize: '2.2rem', marginBottom: '0.3rem', fontWeight: 600 }}>Student Management</h1>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>Manage university students and users</p>
+                        <h1 style={{ fontSize: '2.2rem', marginBottom: '0.3rem', fontWeight: 600 }}>{t('student_mgmt_title')}</h1>
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('student_mgmt_desc')}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', padding: '0.6rem 1.2rem', borderRadius: '50px', background: 'var(--color-bg-light)' }}>
@@ -118,7 +118,7 @@ export default function StudentManagement() {
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-panel" style={{ padding: '2.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600 }}>All Students</h3>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600 }}>{t('all_students')}</h3>
                         <button className="btn"
                             onClick={handleExportCSV}
                             style={{
@@ -128,7 +128,7 @@ export default function StudentManagement() {
                                 border: 'none', fontWeight: 600, cursor: 'pointer',
                                 boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
                             }}>
-                            Download CSV
+                            {t('download_csv')}
                         </button>
                     </div>
 
@@ -136,18 +136,18 @@ export default function StudentManagement() {
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
                             <thead>
                                 <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                    <th style={{ padding: '1rem' }}>Student ID</th>
-                                    <th style={{ padding: '1rem' }}>Name</th>
-                                    <th style={{ padding: '1rem' }}>Email</th>
-                                    <th style={{ padding: '1rem' }}>University</th>
-                                    <th style={{ padding: '1rem', textAlign: 'center' }}>Major</th>
-                                    <th style={{ padding: '1rem', textAlign: 'center' }}>Year</th>
+                                    <th style={{ padding: '1rem' }}>{t('student_id')}</th>
+                                    <th style={{ padding: '1rem' }}>{t('name')}</th>
+                                    <th style={{ padding: '1rem' }}>{t('email_address')}</th>
+                                    <th style={{ padding: '1rem' }}>{t('university')}</th>
+                                    <th style={{ padding: '1rem', textAlign: 'center' }}>{t('major')}</th>
+                                    <th style={{ padding: '1rem', textAlign: 'center' }}>{t('year')}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {students.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>No students found.</td>
+                                        <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>{t('no_students_found')}</td>
                                     </tr>
                                 ) : (
                                     students.map(student => (

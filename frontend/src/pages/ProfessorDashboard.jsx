@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Search, Bell } from 'lucide-react';
+import { Bell, Search, Calendar, MapPin, Download } from 'lucide-react'; // Added MapPin back, added Download
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
@@ -39,9 +39,9 @@ function parseSchedule(scheduleTime) {
     return days.map(day => ({ day, startOffset, duration, startTime, endTime }));
 }
 
-export default function ProfessorDashboard() {
+export default function ProfessorDashboard() { // Removed 'token' prop
     const navigate = useNavigate();
-    const { t } = useLanguage();
+    const { t } = useLanguage(); // Kept one declaration
     const [user, setUser] = useState(null);
     const [courses, setCourses] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
@@ -93,7 +93,7 @@ export default function ProfessorDashboard() {
     };
 
     if (loading) {
-        return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}>Loading...</div>;
+        return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}>{t('loading')}</div>;
     }
 
     const totalStudentsEnrolled = courses.reduce((sum, c) => sum + (parseInt(c.enrolled_count) || 0), 0);
@@ -128,8 +128,8 @@ export default function ProfessorDashboard() {
                     style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}
                 >
                     <div>
-                        <h1 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0, color: 'var(--color-text)' }}>Professor Dashboard</h1>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', marginTop: '0.5rem' }}>Overview of your teaching schedule and class capacities.</p>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0, color: 'var(--color-text)' }}>{t('prof_dashboard_title')}</h1>
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', marginTop: '0.5rem' }}>{t('prof_dashboard_desc')}</p>
                     </div>
 
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
@@ -155,23 +155,29 @@ export default function ProfessorDashboard() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '2rem', paddingBottom: '2rem' }}>
                     {/* Stats Overview */}
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '2rem' }}>
-                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Classes</h3>
+                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('my_classes')}</h3>
                         <div style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1, color: 'var(--color-primary)' }}>{totalClasses}</div>
-                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>Assigned this semester</p>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>{t('this_semester')}</p>
                     </motion.div>
 
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '2rem' }}>
-                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Students</h3>
+                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('classes_today')}</h3>
+                        <div style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1, color: '#10b981' }}>{todayClasses.length}</div>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>{new Date().toLocaleDateString(undefined, { weekday: 'long' })}</p>
+                    </motion.div>
+
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '2rem' }}>
+                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('total_students')}</h3>
                         <div style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1, color: '#10b981' }}>{totalStudentsEnrolled}</div>
-                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>Currently enrolled across all classes</p>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>{t('across_all_courses')}</p>
                     </motion.div>
 
                     {/* Today's Schedule Mini-View */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '2rem' }}>
-                        <h3 style={{ color: 'var(--color-text)', fontSize: '1.2rem', marginBottom: '1.5rem', fontWeight: 600 }}>Classes Today ({dayOfWeek})</h3>
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-panel" style={{ gridColumn: 'span 6', padding: '2rem' }}>
+                        <h3 style={{ color: 'var(--color-text)', fontSize: '1.2rem', marginBottom: '1.5rem', fontWeight: 600 }}>{t('classes_today')} ({dayOfWeek})</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '180px', overflowY: 'auto', paddingRight: '0.5rem' }}>
                             {todayClasses.length === 0 ? (
-                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>No classes scheduled for today.</p>
+                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>{t('no_classes_today')}</p>
                             ) : (
                                 todayClasses.map(course => (
                                     <div key={course.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -189,11 +195,11 @@ export default function ProfessorDashboard() {
                     </motion.div>
 
                     {/* Recent Announcements */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="glass-panel" style={{ gridColumn: 'span 12', padding: '2.5rem' }}>
-                        <h3 style={{ color: 'var(--color-text)', fontSize: '1.2rem', marginBottom: '1.5rem', fontWeight: 600 }}>Recent Announcements</h3>
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="glass-panel" style={{ gridColumn: 'span 6', padding: '2.5rem' }}>
+                        <h3 style={{ color: 'var(--color-text)', fontSize: '1.2rem', marginBottom: '1.5rem', fontWeight: 600 }}>{t('recent_announcements')}</h3>
                         <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
                             {announcements.length === 0 ? (
-                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>No announcements posted yet.</p>
+                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>{t('no_announcements')}</p>
                             ) : (
                                 announcements.map(ann => (
                                     <div key={ann.id} style={{ minWidth: '300px', maxWidth: '300px', padding: '1.2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -210,15 +216,15 @@ export default function ProfessorDashboard() {
                     {/* Weekly Timetable */}
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-panel" style={{ gridColumn: 'span 12', padding: '2.5rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text)' }}>Weekly Teaching Schedule</h3>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text)' }}>{t('weekly_schedule')}</h3>
                             <button className="btn btn-primary" onClick={handleDownloadTimetable} style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                Download <Calendar size={16} />
+                                {t('download')} <Download size={16} />
                             </button>
                         </div>
                         <div ref={timetableRef} style={{ background: '#FAFAFA', borderRadius: '16px', padding: '1.5rem', overflow: 'auto' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(30, 1fr)', fontSize: '0.72rem', minWidth: '1100px' }}>
                                 {/* Header Row */}
-                                <div style={{ padding: '0.5rem', fontWeight: 700, textAlign: 'center', background: '#F3F4F6', color: '#4B5563', borderRadius: '8px 0 0 0', fontSize: '0.72rem', borderBottom: '1px solid #E5E7EB', borderRight: '1px solid #E5E7EB' }}>DAY/TIME</div>
+                                <div style={{ padding: '0.5rem', fontWeight: 700, textAlign: 'center', background: '#F3F4F6', color: '#4B5563', borderRadius: '8px 0 0 0', fontSize: '0.72rem', borderBottom: '1px solid #E5E7EB', borderRight: '1px solid #E5E7EB' }}>{t('day_time')}</div>
                                 {HALF_HOURS.map((slot, i) => (
                                     <div key={i} style={{
                                         padding: '0.4rem 0', fontWeight: slot.min === 0 ? 700 : 500, textAlign: 'center', background: '#F3F4F6', color: '#4B5563',
@@ -236,7 +242,7 @@ export default function ProfessorDashboard() {
                                         <div style={{
                                             padding: '0.6rem 0.4rem', fontWeight: 700, textAlign: 'center', background: dayIdx % 2 === 0 ? '#fff' : '#f9f9f9',
                                             borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#333'
-                                        }}>{day}</div>
+                                        }}>{t(day.toLowerCase())}</div>
                                         <div style={{
                                             gridColumn: '2 / -1', position: 'relative', minHeight: '64px',
                                             background: dayIdx % 2 === 0 ? '#fff' : '#f9f9f9', borderBottom: '1px solid #eee',

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Settings } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function AdminDashboard({ user, token, adminPhase, setAdminPhase }) {
+    const { t } = useLanguage();
     const [demandData, setDemandData] = useState([]);
     const [confirmPhaseModal, setConfirmPhaseModal] = useState({ show: false, newPhase: null });
     const [stats, setStats] = useState({ totalCourses: 0, overSubscribed: 0 });
@@ -65,16 +67,16 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                 body: JSON.stringify({ title: newsTitle, content: newsContent })
             });
             if (res.ok) {
-                alert('University News posted successfully!');
+                alert(t('news_posted_success'));
                 setNewsTitle('');
                 setNewsContent('');
             } else {
                 const data = await res.json();
-                alert(data.error || 'Failed to post news');
+                alert(data.error || t('news_post_error'));
             }
         } catch (error) {
             console.error('Error posting news:', error);
-            alert('Error posting news');
+            alert(t('news_post_error'));
         } finally {
             setNewsPosting(false);
         }
@@ -94,7 +96,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                         transition: 'all 0.2s'
                     }}
                 >
-                    Overview & Demand
+                    {t('overview_demand')}
                 </button>
                 <button
                     onClick={() => setActiveTab('news')}
@@ -105,7 +107,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                         transition: 'all 0.2s'
                     }}
                 >
-                    University News
+                    {t('uni_news_tab')}
                 </button>
             </div>
 
@@ -113,38 +115,38 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '2rem' }}>
                     {/* Admin Stats Cards */}
                     <div className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem' }}>
-                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Courses</h3>
+                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('total_courses')}</h3>
                         <div style={{ fontSize: '3.2rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1 }} className="text-gradient">{stats.totalCourses}</div>
                         <p style={{ fontSize: '0.95rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '2px 8px', borderRadius: '20px' }}>Active</span> In Database
+                            <span style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '2px 8px', borderRadius: '20px' }}>Active</span> {t('active_in_db')}
                         </p>
                     </div>
 
                     <div className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem' }}>
-                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Phase</h3>
+                        <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('current_phase')}</h3>
                         <div style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2, color: 'var(--color-primary)' }}>
-                            {adminPhase === 'PRE_ENROLLMENT' ? 'Pre-Enroll' : (adminPhase === 'ENROLLMENT' ? 'Active' : 'Closed')}
+                            {adminPhase === 'PRE_ENROLLMENT' ? t('pre_enrollment') : (adminPhase === 'ENROLLMENT' ? t('active_enrollment') : t('closed'))}
                         </div>
                         <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            System Enrollment State
+                            {t('system_enroll_state')}
                         </p>
                     </div>
 
                     <div className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem', background: stats.overSubscribed > 0 ? 'rgba(239, 68, 68, 0.9)' : 'var(--color-primary-dark)', color: 'white', border: 'none' }}>
-                        <h3 style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Oversubscribed</h3>
+                        <h3 style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('oversubscribed')}</h3>
                         <div style={{ fontSize: '3.2rem', fontWeight: 700, marginBottom: '0.5rem', color: 'white', lineHeight: 1 }}>{stats.overSubscribed}</div>
-                        <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)' }}>Courses Need Capacity Review</p>
+                        <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)' }}>{t('need_review')}</p>
                     </div>
 
                     {/* Admin Panel Controls Core */}
                     <div className="glass-panel" style={{ gridColumn: 'span 12', padding: '2.5rem', border: '1px solid var(--color-primary)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <div>
-                                <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-primary)' }}>Faculty & Admin Controls</h3>
-                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>Manage enrollment phases and view course demand analytics</p>
+                                <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-primary)' }}>{t('admin_controls')}</h3>
+                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>{t('admin_controls_desc')}</p>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <span style={{ fontWeight: 600 }}>Modify Settings Phase:</span>
+                                <span style={{ fontWeight: 600 }}>{t('modify_phase')}</span>
                                 <select
                                     value={adminPhase}
                                     onChange={(e) => {
@@ -153,25 +155,25 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                     }}
                                     style={{ padding: '0.6rem 1rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
                                 >
-                                    <option value="PRE_ENROLLMENT">Pre-Enrollment</option>
-                                    <option value="ENROLLMENT">Active Enrollment</option>
-                                    <option value="CLOSED">Closed</option>
+                                    <option value="PRE_ENROLLMENT">{t('pre_enrollment')}</option>
+                                    <option value="ENROLLMENT">{t('active_enrollment')}</option>
+                                    <option value="CLOSED">{t('closed')}</option>
                                 </select>
                             </div>
                         </div>
 
-                        <h4 style={{ fontWeight: 600, marginBottom: '1rem', fontSize: '1.1rem' }}>Course Demand Tracking</h4>
+                        <h4 style={{ fontWeight: 600, marginBottom: '1rem', fontSize: '1.1rem' }}>{t('demand_tracking')}</h4>
                         <div style={{ overflowX: 'auto', background: 'var(--color-bg-light)', borderRadius: '12px', padding: '1rem' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                 <thead>
                                     <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                        <th style={{ padding: '0.8rem' }}>Course</th>
-                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>Capacity</th>
-                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>Pre-Enrolled</th>
-                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>Waitlisted</th>
-                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>Officially Enrolled</th>
+                                        <th style={{ padding: '0.8rem' }}>{t('course')}</th>
+                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>{t('capacity')}</th>
+                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>{t('officially_enrolled')}</th>
+                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>{t('waitlisted')}</th>
+                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>{t('enrolled_badge')}</th>
                                         {/* Changed Action to suggest future course management */}
-                                        <th style={{ padding: '0.8rem', textAlign: 'right' }}>Action</th>
+                                        <th style={{ padding: '0.8rem', textAlign: 'right' }}>{t('action')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -207,7 +209,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                                             }
                                                         }}
                                                         style={{ padding: '0.4rem 0.8rem', background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                        Edit Cap
+                                                        {t('edit_cap')}
                                                     </button>
                                                 </td>
                                             </tr>
@@ -224,13 +226,13 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '2rem' }}>
                     {/* University News Form */}
                     <div className="glass-panel" style={{ gridColumn: 'span 12', padding: '2.5rem' }}>
-                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>Post University News</h3>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>Announcements posted here will appear on all student and staff dashboards.</p>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: '0.5rem' }}>{t('post_news')}</h3>
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>{t('post_news_desc')}</p>
                         <form onSubmit={handlePostNews}>
                             <div style={{ marginBottom: '1rem' }}>
                                 <input
                                     type="text"
-                                    placeholder="News Headline"
+                                    placeholder={t('news_headline')}
                                     value={newsTitle}
                                     onChange={(e) => setNewsTitle(e.target.value)}
                                     className="input-field"
@@ -239,7 +241,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                             </div>
                             <div style={{ marginBottom: '1.5rem' }}>
                                 <textarea
-                                    placeholder="News Content..."
+                                    placeholder={t('news_content')}
                                     value={newsContent}
                                     onChange={(e) => setNewsContent(e.target.value)}
                                     className="input-field"
@@ -248,7 +250,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                 />
                             </div>
                             <button type="submit" className="btn btn-primary" disabled={newsPosting} style={{ padding: '0.8rem 2rem' }}>
-                                {newsPosting ? 'Posting...' : 'Publish News'}
+                                {newsPosting ? t('enrolling') : t('publish_news')}
                             </button>
                         </form>
                     </div>
@@ -267,18 +269,18 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                         <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
                             <Settings size={30} color="#ef4444" />
                         </div>
-                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--color-text)' }}>Confirm Phase Change</h3>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--color-text)' }}>{t('confirm_phase_change')}</h3>
                         <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem', lineHeight: 1.5 }}>
-                            Are you sure you want to change the enrollment phase to <strong>{confirmPhaseModal.newPhase}</strong>? This might trigger automatic waitlist enrollments and change what students see.
+                            {t('confirm_phase_desc').replace('{phase}', confirmPhaseModal.newPhase)}
                         </p>
                         <div style={{ display: 'flex', gap: '1rem' }}>
                             <button className="btn" onClick={() => setConfirmPhaseModal({ show: false, newPhase: null })}
                                 style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
-                                Cancel
+                                {t('cancel')}
                             </button>
                             <button className="btn" onClick={executePhaseChange}
                                 style={{ flex: 1, padding: '0.8rem', background: '#ef4444', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(239, 68, 68, 0.3)' }}>
-                                Confirm
+                                {t('confirm')}
                             </button>
                         </div>
                     </motion.div>

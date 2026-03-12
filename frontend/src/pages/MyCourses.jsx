@@ -48,6 +48,10 @@ function parseSchedule(scheduleTime) {
     return days.map(day => ({ day, startOffset, duration, startTime, endTime }));
 }
 
+function getDayLabel(dayKey, t) {
+    return t(dayKey.toLowerCase());
+}
+
 export default function MyCourses() {
     const navigate = useNavigate();
     const { t } = useLanguage();
@@ -244,7 +248,7 @@ export default function MyCourses() {
                                             border: `1px solid ${course.status === 'PRE_ENROLLED' ? 'rgba(242, 159, 5, 0.2)' : (course.status === 'WAITLISTED' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)')}`,
                                             padding: '4px 10px', borderRadius: '6px'
                                         }}>
-                                            {course.status === 'PRE_ENROLLED' ? 'Pre-Enrolled' : (course.status === 'WAITLISTED' ? 'Waitlisted' : t('enrolled_badge') || 'Enrolled')}
+                                            {course.status === 'PRE_ENROLLED' ? t('pre_enrolled') : (course.status === 'WAITLISTED' ? t('waitlisted') : t('enrolled_badge'))}
                                         </span>
 
                                         {course.grade && (
@@ -261,7 +265,7 @@ export default function MyCourses() {
                                         <motion.button whileHover={{ scale: 1.05, backgroundColor: 'rgba(59, 130, 246, 0.2)' }} whileTap={{ scale: 0.95 }}
                                             onClick={() => handleViewAnnouncements(course)}
                                             style={{ padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid rgba(59, 130, 246, 0.4)', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500, fontSize: '0.85rem', fontFamily: 'var(--font-main)' }}>
-                                            <FileText size={15} /> Announcements
+                                             <FileText size={15} /> {t('announcements')}
                                         </motion.button>
                                         <motion.button whileHover={{ scale: 1.05, backgroundColor: 'rgba(239, 68, 68, 0.2)' }} whileTap={{ scale: 0.95 }}
                                             onClick={() => setConfirmDropModalId(course.enrollment_id)} disabled={droppingId === course.enrollment_id}
@@ -305,7 +309,7 @@ export default function MyCourses() {
                                         <div style={{
                                             padding: '0.6rem 0.4rem', fontWeight: 700, textAlign: 'center', background: dayIdx % 2 === 0 ? '#fff' : '#f9f9f9',
                                             borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#333'
-                                        }}>{day}</div>
+                                        }}>{getDayLabel(day, t)}</div>
                                         <div style={{
                                             gridColumn: '2 / -1', position: 'relative', minHeight: '56px',
                                             background: dayIdx % 2 === 0 ? '#fff' : '#f9f9f9', borderBottom: '1px solid #eee',
@@ -407,9 +411,9 @@ export default function MyCourses() {
                             <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
                                 <Trash2 size={30} color="#ef4444" />
                             </div>
-                            <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--color-text)' }}>{t('Warning!') || 'Confirm Drop'}</h3>
+                             <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--color-text)' }}>{t('warning_title')}</h3>
                             <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem', lineHeight: 1.5 }}>
-                                Are you sure you want to drop <strong>{courseToDrop?.name}</strong>? This action cannot be undone.
+                                {t('confirm_drop_desc').replace('{courseName}', courseToDrop?.name || '')}
                             </p>
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <button className="btn" onClick={() => setConfirmDropModalId(null)}
@@ -435,16 +439,16 @@ export default function MyCourses() {
                     <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel"
                         style={{ padding: '2rem', borderRadius: '16px', maxWidth: '600px', width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-text)' }}>
-                                Announcements - {selectedCourseForAnnouncements.code}
+                             <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-text)' }}>
+                                {t('announcements_title').replace('{courseCode}', selectedCourseForAnnouncements.code)}
                             </h3>
                             <button className="btn" onClick={() => setSelectedCourseForAnnouncements(null)} style={{ background: 'transparent', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--color-text-muted)' }}>&times;</button>
                         </div>
                         <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
-                            {loadingAnnouncements ? (
-                                <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Loading announcements...</p>
+                             {loadingAnnouncements ? (
+                                <p style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>{t('loading_announcements')}</p>
                             ) : courseAnnouncements.length === 0 ? (
-                                <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>No announcements posted yet.</p>
+                                <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>{t('no_announcements_course')}</p>
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     {courseAnnouncements.map(ann => (

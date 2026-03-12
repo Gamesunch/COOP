@@ -13,7 +13,7 @@ export default function StudentDashboard({ user, stats, todaySchedule, announcem
                 <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('total_credits')}</h3>
                 <div style={{ fontSize: '3.2rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1 }} className="text-gradient">{stats.credits}</div>
                 <p style={{ fontSize: '0.95rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '2px 8px', borderRadius: '20px' }}>Active</span> {t('this_semester')}
+                    <span style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '2px 8px', borderRadius: '20px' }}>{t('active_badge')}</span> {t('this_semester')}
                 </p>
             </motion.div>
 
@@ -21,14 +21,14 @@ export default function StudentDashboard({ user, stats, todaySchedule, announcem
                 <h3 style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('current_gpa')}</h3>
                 <div style={{ fontSize: '3.2rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1 }}>{stats.gpa}</div>
                 <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    Based on graded courses
+                    {t('based_on_graded_courses')}
                 </p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-panel" style={{ gridColumn: 'span 4', padding: '1.8rem', background: 'var(--color-primary-dark)', color: 'white', border: 'none' }}>
-                <h3 style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Waitlisted Courses</h3>
+                <h3 style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginBottom: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('waitlisted_active')}</h3>
                 <div style={{ fontSize: '3.2rem', fontWeight: 700, marginBottom: '0.5rem', color: 'white', lineHeight: 1 }}>{stats.pending}</div>
-                <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)' }}>Pending Action</p>
+                <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)' }}>{t('pending_action')}</p>
             </motion.div>
 
             {/* Schedule / Main Section */}
@@ -42,7 +42,7 @@ export default function StudentDashboard({ user, stats, todaySchedule, announcem
                     {todaySchedule.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
                             <Calendar size={48} style={{ opacity: 0.4, marginBottom: '1rem' }} />
-                            <p>No classes scheduled for today.</p>
+                            <p>{t('no_classes_today')}</p>
                         </div>
                     ) : (
                         todaySchedule.map((course, idx) => (
@@ -66,13 +66,13 @@ export default function StudentDashboard({ user, stats, todaySchedule, announcem
                 <h3 style={{ fontSize: '1.4rem', marginBottom: '2rem', fontWeight: 600 }}>{t('uni_news')}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem', maxHeight: '450px', overflowY: 'auto', paddingRight: '0.5rem' }}>
                     {(!announcements || announcements.length === 0) ? (
-                        <p style={{ color: 'var(--color-text-muted)' }}>No recent news or announcements.</p>
+                        <p style={{ color: 'var(--color-text-muted)' }}>{t('no_news_announcements')}</p>
                     ) : (
                         announcements.map((ann, idx) => {
                             const isGlobal = !ann.course_id;
                             const badgeColor = isGlobal ? 'var(--color-primary)' : 'var(--color-secondary)';
                             const badgeBg = isGlobal ? 'rgba(139,92,246,0.1)' : 'rgba(236,72,153,0.1)';
-                            const badgeText = isGlobal ? 'University Notice' : ann.course_code;
+                            const badgeText = isGlobal ? t('uni_notice') : ann.course_code;
 
                             return (
                                 <div key={idx} style={{ paddingBottom: '1.5rem', borderBottom: idx !== announcements.length - 1 ? '1px solid var(--glass-border)' : 'none' }}>

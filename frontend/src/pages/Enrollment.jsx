@@ -122,7 +122,7 @@ export default function Enrollment() {
                     style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                     <div>
                         <h1 style={{ fontSize: '2.2rem', marginBottom: '0.3rem', fontWeight: 600 }}>
-                            {phase === 'PRE_ENROLLMENT' ? 'Pre-Enrollment (Course Catalog)' : t('course_catalog')}
+                            {phase === 'PRE_ENROLLMENT' ? t('pre_enrollment_catalog') : t('course_catalog')}
                         </h1>
                         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.05rem' }}>{t('browse_enroll_desc')}</p>
                     </div>
@@ -145,15 +145,15 @@ export default function Enrollment() {
 
                 {phase === 'PRE_ENROLLMENT' && (
                     <div style={{ marginBottom: '1.5rem', padding: '1rem 1.5rem', borderRadius: '12px', background: 'rgba(242, 159, 5, 0.15)', borderLeft: '4px solid var(--color-primary)', color: 'var(--color-text)' }}>
-                        <h4 style={{ fontWeight: 700, color: 'var(--color-primary)', marginBottom: '0.4rem', fontSize: '1.1rem' }}>Pre-Enrollment Period Active</h4>
-                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>Reserving a spot does not guarantee final placement if demand exceeds capacity. You will be waitlisted if the class fills up when official enrollment starts.</p>
+                        <h4 style={{ fontWeight: 700, color: 'var(--color-primary)', marginBottom: '0.4rem', fontSize: '1.1rem' }}>{t('pre_enrollment_period_active')}</h4>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>{t('pre_enrollment_period_desc')}</p>
                     </div>
                 )}
 
                 {phase === 'CLOSED' && (
                     <div style={{ marginBottom: '1.5rem', padding: '1rem 1.5rem', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)', borderLeft: '4px solid #ef4444', color: 'var(--color-text)' }}>
-                        <h4 style={{ fontWeight: 700, color: '#ef4444', marginBottom: '0.4rem', fontSize: '1.1rem' }}>Enrollment Closed</h4>
-                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>The active enrollment period is currently closed. You cannot enroll or pre-enroll in courses at this time.</p>
+                        <h4 style={{ fontWeight: 700, color: '#ef4444', marginBottom: '0.4rem', fontSize: '1.1rem' }}>{t('enrollment_closed')}</h4>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)' }}>{t('enrollment_closed_desc')}</p>
                     </div>
                 )}
 
@@ -203,18 +203,14 @@ export default function Enrollment() {
                                 {isEnrolled ? (
                                     <div style={{
                                         padding: '0.8rem', textAlign: 'center', borderRadius: '12px',
-                                        background: enrollment.status === 'PRE_ENROLLED' ? 'rgba(242, 159, 5, 0.1)' : (enrollment.status === 'WAITLISTED' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)'),
-                                        color: enrollment.status === 'PRE_ENROLLED' ? 'var(--color-primary)' : (enrollment.status === 'WAITLISTED' ? '#ef4444' : '#10b981'),
-                                        fontWeight: 600, fontSize: '0.95rem',
-                                        border: `1px solid ${enrollment.status === 'PRE_ENROLLED' ? 'rgba(242, 159, 5, 0.2)' : (enrollment.status === 'WAITLISTED' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)')}`
                                     }}>
-                                        {enrollment.status === 'PRE_ENROLLED' ? 'Pre-Enrolled' : (enrollment.status === 'WAITLISTED' ? 'Waitlisted' : t('enrolled_badge'))}
+                                        {enrollment.status === 'PRE_ENROLLED' ? t('pre_enrolled') : (enrollment.status === 'WAITLISTED' ? t('waitlisted') : t('enrolled_badge'))}
                                     </div>
                                 ) : (
                                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                                         className="btn btn-primary" onClick={() => handleEnroll(course.id)} disabled={enrollingId === course.id || phase === 'CLOSED'}
                                         style={{ padding: '0.8rem', borderRadius: '12px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', opacity: phase === 'CLOSED' ? 0.5 : 1, cursor: phase === 'CLOSED' ? 'not-allowed' : 'pointer' }}>
-                                        <BookPlus size={18} /> {enrollingId === course.id ? t('enrolling') : (phase === 'PRE_ENROLLMENT' ? 'Pre-Enroll' : t('enroll_btn'))}
+                                        <BookPlus size={18} /> {enrollingId === course.id ? t('enrolling') : (phase === 'PRE_ENROLLMENT' ? t('pre_enroll_btn') : t('enroll_btn'))}
                                     </motion.button>
                                 )}
                             </motion.div>
