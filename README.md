@@ -14,6 +14,8 @@ RegisSPHERE is a modern, comprehensive student portal and university management 
 - **Dynamic Localization**: Built-in, instant switching between English and Thai languages across the entire application interface.
 - **Secure Authentication & RBAC**: Robust user registration and login flows utilizing JWT for session management and Bcrypt for password hashing. Includes specific Student, Professor, and Admin roles.
 - **Admin Control Panel**: Comprehensive dashboard for administrators to oversee system operations, manage user accounts, construct the course catalog, and broadcast university-wide news.
+- **Enrollment Phase Management**: Admins can transition the system between **Pre-Enrollment** (demand gathering), **Active Enrollment**, and **Closed** phases.
+- **Waitlist & Capacity Tracking**: Automatic waitlist promotion when seats become available. Admins can monitor real-time demand for oversubscribed courses.
 - **Student Dashboard**: A central hub providing an overview of the student's status with quick navigation to primary academic modules and an aggregated news feed.
 - **Professor Portal & Grading**: Dedicated dashboard for professors to view their assigned courses, assign grades to students, download class rosters as CSV files, and post course-specific updates.
 - **University News & Announcements**: Global university news board alongside course-specific announcement feeds to keep students and staff informed.
@@ -23,6 +25,7 @@ RegisSPHERE is a modern, comprehensive student portal and university management 
     - **Enrolled Courses**: Overview of current enrollments.
     - **Study Timetable**: An automatically generated, visual grid calendar of the student's week, complete with a functionality to export the timetable as a PNG image.
     - **Exam Schedule**: Clear breakdowns of midterm and final exam dates for enrolled subjects.
+- **Study Path Guidance**: A visual curriculum guide helping students track their progress against program requirements and prerequisites.
 - **Grades and Progress Tracking**: A dedicated module for students to view academic results, offering sorting by Academic Year, visual grade badges, and automatic calculations for Semester GPA and Cumulative GPAX.
 - **Modern Minimalist Interface**: Clean UI built on a unified color system, leveraging Framer Motion for sophisticated animations and glassmorphism principles.
 
@@ -65,7 +68,13 @@ COOP/
 │   │   └── app.js          # Core Express application setup
 │   ├── .env                # Local environment variables (ignored in Git)
 │   ├── check_schema.js     # Database initialization script
+│   ├── migrate_announcements.js # Announcements table migration
 │   ├── migrate_grades.js   # Grades migration script
+│   ├── migrate_exam.js     # Exam schedule migration
+│   ├── migrate_pre_enrollment.js # Phase management settings
+│   ├── migrate_student_id.js # Student ID format migration
+│   ├── migrate_multiple_professors.js # Multi-professor support
+│   ├── seed_admin.js       # Initial administrator account
 │   └── seed_courses.js     # Sample data generation script
 ├── frontend/               # React client application
 │   ├── src/
@@ -109,9 +118,14 @@ JWT_SECRET=your_secure_randomjwt_string
 Run database migrations to initialize tables and sample data (ensure `DATABASE_URL` is active):
 ```bash
 node check_schema.js
-node seed_courses.js
+node migrate_multiple_professors.js
+node migrate_student_id.js
+node migrate_announcements.js
 node migrate_exam.js
 node migrate_grades.js
+node migrate_pre_enrollment.js
+node seed_courses.js
+node seed_admin.js
 ```
 
 ### 3. Frontend Initialization
@@ -153,7 +167,14 @@ The modular backend structure exposes the following capabilities:
 | **Enrollment** | `POST` | `/api/enrollments` | Process new student enrollment |
 | **Enrollment** | `GET` | `/api/enrollments/mine` | Retrieve active student enrollments |
 | **Enrollment** | `DELETE` | `/api/enrollments/:id` | Drop specified course |
-| **Grades** | `GET` | `/api/grades/mine` | Aggregated GPA, academic year, and grading data |
+| **Grades** | `GET` | `/api/grades/mine` | Aggregated GPA and grading data |
+| **Admin Controls** | `GET` | `/api/admin/phase` | Get current enrollment phase |
+| **Admin Controls** | `POST` | `/api/admin/phase` | Update enrollment phase |
+| **Admin Controls** | `GET` | `/api/admin/demand` | Get course demand analytics |
+| **Admin Controls** | `GET` | `/api/admin/students` | List all students for management |
+| **Announcements** | `GET` | `/api/announcements/university` | Get global university news |
+| **Announcements** | `POST` | `/api/announcements/university` | Post global news (Admin) |
+| **Announcements** | `POST` | `/api/announcements/course/:id` | Post course announcement (Professor) |
 
 ## License
 This software project is restricted under the ISC License.
