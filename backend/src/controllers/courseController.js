@@ -19,7 +19,7 @@ exports.getAllCourses = async (req, res) => {
             LEFT JOIN course_professors cp ON c.id = cp.course_id
             LEFT JOIN users u ON cp.professor_id = u.id
             GROUP BY c.id
-            ORDER BY c.semester_number ASC, c.code ASC
+            ORDER BY c.semester_number ASC, c.min_year ASC, c.code ASC
         `);
         res.json(result.rows);
     } catch (error) {
@@ -58,10 +58,10 @@ exports.createCourse = async (req, res) => {
 
         const result = await db.query(
             `INSERT INTO courses 
-        (name, code, description, credits, schedule_time, room, capacity) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+        (name, code, description, credits, schedule_time, room, capacity, min_year, semester_number, track) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
        RETURNING *`,
-            [name, code, description, credits, schedule_time, room, capacity]
+            [name, code, description, credits, schedule_time, room, capacity, req.body.min_year || 1, req.body.semester_number, req.body.track]
         );
         const newCourse = result.rows[0];
 
@@ -89,9 +89,9 @@ exports.updateCourse = async (req, res) => {
 
         const result = await db.query(
             `UPDATE courses 
-             SET name=$1, code=$2, description=$3, credits=$4, schedule_time=$5, room=$6, capacity=$7 
-             WHERE id=$8 RETURNING *`,
-            [name, code, description, credits, schedule_time, room, capacity, id]
+             SET name=$1, code=$2, description=$3, credits=$4, schedule_time=$5, room=$6, capacity=$7, min_year=$8, semester_number=$9, track=$10
+             WHERE id=$11 RETURNING *`,
+            [name, code, description, credits, schedule_time, room, capacity, req.body.min_year, req.body.semester_number, req.body.track, id]
         );
 
         if (result.rows.length === 0) {

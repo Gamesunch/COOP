@@ -15,5 +15,6 @@ router.put('/courses/:id/capacity', authenticateToken, requireRole(['ADMIN', 'PR
 
 // Student management
 router.get('/students', authenticateToken, requireRole(['ADMIN', 'PROFESSOR']), adminController.getStudents);
+router.put('/students/:id/year', authenticateToken, requireRole(['ADMIN', 'PROFESSOR']), adminController.updateStudentYear);
 
 module.exports = router;

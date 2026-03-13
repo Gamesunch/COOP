@@ -9,14 +9,14 @@ export default function Sidebar({ activePath }) {
     const navigate = useNavigate();
     const { t } = useLanguage();
     const [phase, setPhase] = useState('ENROLLMENT');
-    const [userRole, setUserRole] = useState('STUDENT');
+    const [userRole, setUserRole] = useState(null); // Default to null to prevent flash of student items
 
     useEffect(() => {
         const fetchPhase = async () => {
             const token = localStorage.getItem('token');
             const user = JSON.parse(localStorage.getItem('user'));
             if (user && user.role) {
-                setUserRole(user.role);
+                setUserRole(user.role.toUpperCase());
             }
             if (token) {
                 try {
@@ -41,15 +41,19 @@ export default function Sidebar({ activePath }) {
         navigate('/login');
     };
 
+    if (!userRole) return null; // Wait for role detection
+
     let navItems = [];
-    if (userRole === 'ADMIN') {
+    const role = userRole.toUpperCase();
+    
+    if (role === 'ADMIN') {
         navItems = [
             { icon: LayoutDashboard, label: t('overview'), path: '/dashboard' },
             { icon: BookOpen, label: t('course_mgmt_title'), path: '/admin/courses' },
             { icon: Users, label: t('student_mgmt_title'), path: '/admin/students' },
             { icon: Settings, label: t('settings'), path: '/settings' }
         ];
-    } else if (userRole === 'PROFESSOR') {
+    } else if (role === 'PROFESSOR') {
         navItems = [
             { icon: LayoutDashboard, label: t('overview'), path: '/professor/dashboard' },
             { icon: BookOpen, label: t('my_classes'), path: '/professor/courses' },
@@ -67,6 +71,12 @@ export default function Sidebar({ activePath }) {
             { icon: Settings, label: t('settings'), path: '/settings' }
         ];
     }
+
+    const getSubtitle = () => {
+        if (role === 'ADMIN') return t('admin_portal');
+        if (role === 'PROFESSOR') return t('professor_portal');
+        return t('student_portal');
+    };
 
     return (
         <motion.aside
@@ -95,7 +105,7 @@ export default function Sidebar({ activePath }) {
                     <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>Regis</span>
                     <span style={{ fontWeight: 800, letterSpacing: '1px', color: 'white', background: 'var(--color-primary)', padding: '2px 8px', borderRadius: '8px', fontSize: '1.4rem' }}>SPHERE</span>
                 </h2>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginTop: '0.2rem' }}>{t('student_portal')}</p>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', marginTop: '0.2rem' }}>{getSubtitle()}</p>
             </div>
 
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1 }}>

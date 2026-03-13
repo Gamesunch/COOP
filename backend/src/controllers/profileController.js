@@ -38,12 +38,12 @@ exports.getProfile = async (req, res) => {
 // PUT /api/profile - Update editable profile fields (bio only for students)
 exports.updateProfile = async (req, res) => {
     try {
-        const { bio } = req.body;
+        const { bio, yearOfStudy } = req.body;
 
         const result = await db.query(
-            `UPDATE users SET bio = $1 WHERE id = $2 
+            `UPDATE users SET bio = $1, year_of_study = $2 WHERE id = $3 
              RETURNING id, email, first_name, last_name, role, bio, profile_picture_url, university, major, year_of_study`,
-            [bio, req.user.id]
+            [bio, yearOfStudy, req.user.id]
         );
 
         if (result.rows.length === 0) {

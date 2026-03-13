@@ -12,44 +12,68 @@ export default function StudentManagement() {
     const [students, setStudents] = useState([]);
 
     useEffect(() => {
+        fetchData();
+    }, [navigate]);
+
+    const fetchData = async () => {
         const token = localStorage.getItem('token');
         if (!token) {
             navigate('/login');
             return;
         }
+        try {
+            // Fetch profile
+            const profileRes = await fetch('http://localhost:5000/api/profile', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
 
-        const fetchData = async () => {
-            try {
-                // Fetch profile
-                const profileRes = await fetch('http://localhost:5000/api/profile', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                let currentUser = null;
-                if (profileRes.ok) {
-                    currentUser = await profileRes.json();
-                    setUser(currentUser);
-                    if (currentUser.role !== 'ADMIN' && currentUser.role !== 'PROFESSOR') {
-                        navigate('/dashboard'); // Kick students out
-                        return;
-                    }
+            let currentUser = null;
+            if (profileRes.ok) {
+                currentUser = await profileRes.json();
+                setUser(currentUser);
+                if (currentUser.role !== 'ADMIN' && currentUser.role !== 'PROFESSOR') {
+                    navigate('/dashboard'); // Kick students out
+                    return;
                 }
-
-                // Fetch students
-                const studentsRes = await fetch('http://localhost:5000/api/admin/students', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (studentsRes.ok) {
-                    setStudents(await studentsRes.json());
-                }
-
-            } catch (err) {
-                console.error("StudentManagement mount error", err);
-                navigate('/login');
             }
-        };
-        fetchData();
-    }, [navigate]);
+
+            // Fetch students
+            const studentsRes = await fetch('http://localhost:5000/api/admin/students', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (studentsRes.ok) {
+                setStudents(await studentsRes.json());
+            }
+
+        } catch (err) {
+            console.error("StudentManagement mount error", err);
+            navigate('/login');
+        }
+    };
+
+    const handleYearChange = async (studentId, newYear) => {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`http://localhost:5000/api/admin/students/${studentId}/year`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ year_of_study: newYear })
+            });
+
+            if (res.ok) {
+                fetchData(); // Refresh list
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to update year');
+            }
+        } catch (err) {
+            console.error('Error updating student year:', err);
+            alert('Server error updating year');
+        }
+    };
 
     const handleExportCSV = () => {
         if (students.length === 0) return;
@@ -149,7 +173,28 @@ export default function StudentManagement() {
                                             <td style={{ padding: '1rem', color: 'var(--color-text-muted)' }}>{student.email}</td>
                                             <td style={{ padding: '1rem' }}>{student.university || 'N/A'}</td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>{student.major || '-'}</td>
-                                            <td style={{ padding: '1rem', textAlign: 'center' }}>{student.year_of_study || '-'}</td>
+                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                <select 
+                                                    value={student.year_of_study || ''}
+                                                    onChange={(e) => handleYearChange(student.id, e.target.value)}
+                                                    style={{
+                                                        background: 'rgba(255,255,255,0.05)',
+                                                        border: '1px solid var(--glass-border)',
+                                                        borderRadius: '6px',
+                                                        color: 'var(--color-text)',
+                                                        padding: '4px 8px',
+                                                        fontSize: '0.85rem',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    <option value="">-</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5+</option>
+                                                </select>
+                                            </td>
                                         </tr>
                                     ))
                                 )}

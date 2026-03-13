@@ -24,8 +24,8 @@ exports.register = async (req, res) => {
         }
 
         const result = await db.query(
-            'INSERT INTO users (email, password_hash, first_name, last_name, role, student_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, first_name, last_name, role, student_id',
-            [email, passwordHash, firstName, lastName, userRole, studentId]
+            'INSERT INTO users (email, password_hash, first_name, last_name, role, student_id, university, year_of_study) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, email, first_name, last_name, role, student_id',
+            [email, passwordHash, firstName, lastName, userRole, studentId, 'Moodeng Uni', '1']
         );
 
         res.status(201).json({ message: 'User created successfully', user: result.rows[0] });

@@ -10,6 +10,7 @@ export default function StudyPath() {
     const { t } = useLanguage();
     const [courses, setCourses] = useState([]);
     const [myEnrollments, setMyEnrollments] = useState([]);
+    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [enrollingId, setEnrollingId] = useState(null);
     const [selectedTrack, setSelectedTrack] = useState('ALL');
@@ -19,6 +20,8 @@ export default function StudyPath() {
     const cardRefs = useRef({});
 
     useEffect(() => {
+        const userData = localStorage.getItem('user');
+        if (userData) setUser(JSON.parse(userData));
         fetchData();
     }, []);
 
@@ -326,6 +329,7 @@ export default function StudyPath() {
                                         {filteredCourses.filter(c => c.semester_number === sem).map(course => {
                                             const status = getCourseStatus(course);
                                             const color = getStatusColor(status);
+                                            const isYearIneligible = parseInt(user?.yearOfStudy || 1) < (course.min_year || 1);
                                             return (
                                                 <motion.div 
                                                     layout
@@ -362,6 +366,22 @@ export default function StudyPath() {
                                                     <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text)', lineHeight: 1.3, marginBottom: '0.8rem', flexGrow: 1 }}>
                                                         {course.name}
                                                     </div>
+
+                                                    {course.min_year > 1 && (
+                                                        <div style={{ 
+                                                            fontSize: '0.7rem', 
+                                                            color: isYearIneligible ? '#ef4444' : '#10b981', 
+                                                            background: isYearIneligible ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                                                            padding: '4px 8px',
+                                                            borderRadius: '4px',
+                                                            marginBottom: '0.8rem',
+                                                            fontWeight: 700,
+                                                            display: 'inline-block'
+                                                        }}>
+                                                            {t('min_year') || 'Min Year'}: {course.min_year}
+                                                            {isYearIneligible && ` (${t('ineligible') || 'Ineligible'})`}
+                                                        </div>
+                                                    )}
 
                                                     {/* Schedule Info */}
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '1rem' }}>
@@ -402,25 +422,27 @@ export default function StudyPath() {
                                                         {status === 'READY' && (
                                                             <button 
                                                                 onClick={() => handleEnroll(course.id)}
-                                                                disabled={enrollingId === course.id}
+                                                                disabled={enrollingId === course.id || isYearIneligible}
                                                                 style={{
-                                                                    background: 'var(--color-primary)',
+                                                                    background: isYearIneligible ? '#6b7280' : 'var(--color-primary)',
                                                                     color: 'white',
                                                                     border: 'none',
                                                                     borderRadius: '6px',
                                                                     padding: '4px 8px',
                                                                     fontSize: '0.75rem',
                                                                     fontWeight: 600,
-                                                                    cursor: 'pointer',
+                                                                    cursor: isYearIneligible ? 'not-allowed' : 'pointer',
                                                                     display: 'flex',
                                                                     alignItems: 'center',
                                                                     gap: '4px',
-                                                                    transition: 'transform 0.2s'
+                                                                    transition: 'transform 0.2s',
+                                                                    opacity: isYearIneligible ? 0.6 : 1
                                                                 }}
-                                                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                                                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                                                                title={isYearIneligible ? t('year_restricted') : ''}
+                                                                onMouseEnter={e => !isYearIneligible && (e.currentTarget.style.transform = 'scale(1.05)')}
+                                                                onMouseLeave={e => !isYearIneligible && (e.currentTarget.style.transform = 'scale(1)')}
                                                             >
-                                                                {enrollingId === course.id ? t('enrolling') : <><Send size={12} /> {t('enroll_btn')}</>}
+                                                                {isYearIneligible ? t('year_restricted') : (enrollingId === course.id ? t('enrolling') : <><Send size={12} /> {t('enroll_btn')}</>)}
                                                             </button>
                                                         )}
                                                     </div>

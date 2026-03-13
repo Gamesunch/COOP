@@ -168,3 +168,23 @@ exports.getStudents = async (req, res) => {
         res.status(500).json({ error: 'Server error fetching students' });
     }
 };
+exports.updateStudentYear = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { year_of_study } = req.body;
+
+        const result = await db.query(
+            "UPDATE users SET year_of_study = $1 WHERE id = $2 AND role = 'STUDENT' RETURNING id, email, first_name, last_name, year_of_study",
+            [year_of_study, id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
+        res.json({ message: 'Student year updated successfully', user: result.rows[0] });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error updating student year' });
+    }
+};

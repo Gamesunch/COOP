@@ -168,6 +168,7 @@ export default function Enrollment() {
                     {filteredCourses.map((course, i) => {
                         const enrollment = myEnrollments.find(e => e.id === course.id);
                         const isEnrolled = !!enrollment;
+                        const isYearIneligible = parseInt(user?.yearOfStudy || 1) < (course.min_year || 1);
                         return (
                             <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                                 className="glass-panel" style={{ padding: '1.8rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -199,30 +200,64 @@ export default function Enrollment() {
                                     </div>
                                 </div>
 
-                                {isEnrolled ? (
-                                    <div style={{
-                                        padding: '0.8rem', 
-                                        textAlign: 'center', 
-                                        borderRadius: '12px',
-                                        background: 'rgba(242, 159, 5, 0.12)',
-                                        color: 'var(--color-primary)',
-                                        fontWeight: 700,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '0.5rem',
-                                        border: '1px solid rgba(242, 159, 5, 0.2)'
+                                {course.min_year > 1 && (
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '0.5rem', 
+                                        padding: '0.5rem 0.8rem', 
+                                        background: isYearIneligible ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                                        color: isYearIneligible ? '#ef4444' : '#10b981',
+                                        borderRadius: '8px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: 600
                                     }}>
-                                        <Check size={18} strokeWidth={3} />
-                                        {enrollment.status === 'PRE_ENROLLED' ? t('pre_enrolled') : (enrollment.status === 'WAITLISTED' ? t('waitlisted') : t('enrolled_badge'))}
+                                        <Award size={16} />
+                                        {t('min_year_required') || 'Required Year'}: {course.min_year}+
+                                        {isYearIneligible && (
+                                            <span style={{ fontSize: '0.75rem', opacity: 0.8, marginLeft: 'auto' }}>
+                                                ({t('ineligible') || 'Ineligible'})
+                                            </span>
+                                        )}
                                     </div>
-                                ) : (
-                                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                                        className="btn btn-primary" onClick={() => handleEnroll(course.id)} disabled={enrollingId === course.id || phase === 'CLOSED'}
-                                        style={{ padding: '0.8rem', borderRadius: '12px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', opacity: phase === 'CLOSED' ? 0.5 : 1, cursor: phase === 'CLOSED' ? 'not-allowed' : 'pointer' }}>
-                                        <BookPlus size={18} /> {enrollingId === course.id ? t('enrolling') : (phase === 'PRE_ENROLLMENT' ? t('pre_enroll_btn') : t('enroll_btn'))}
-                                    </motion.button>
                                 )}
+
+                                <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
+                                    {isEnrolled ? (
+                                        <div style={{
+                                            padding: '0.8rem', 
+                                            textAlign: 'center', 
+                                            borderRadius: '12px',
+                                            background: 'rgba(242, 159, 5, 0.12)',
+                                            color: 'var(--color-primary)',
+                                            fontWeight: 700,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '0.5rem',
+                                            border: '1px solid rgba(242, 159, 5, 0.2)'
+                                        }}>
+                                            <Check size={18} strokeWidth={3} />
+                                            {enrollment.status === 'PRE_ENROLLED' ? t('pre_enrolled') : (enrollment.status === 'WAITLISTED' ? t('waitlisted') : t('enrolled_badge'))}
+                                        </div>
+                                    ) : (
+                                        <motion.button
+                                            whileHover={isYearIneligible || phase === 'CLOSED' ? {} : { scale: 1.02 }}
+                                            whileTap={isYearIneligible || phase === 'CLOSED' ? {} : { scale: 0.98 }}
+                                            className={`btn ${isYearIneligible || phase === 'CLOSED' ? 'btn-disabled' : 'btn-primary'}`}
+                                            onClick={() => handleEnroll(course.id)}
+                                            disabled={enrollingId === course.id || phase === 'CLOSED' || isYearIneligible}
+                                            style={{ 
+                                                width: '100%', 
+                                                padding: '1rem',
+                                                opacity: isYearIneligible || phase === 'CLOSED' ? 0.6 : 1,
+                                                cursor: isYearIneligible || phase === 'CLOSED' ? 'not-allowed' : 'pointer'
+                                            }}
+                                        >
+                                            {enrollingId === course.id ? t('enrolling') : (isYearIneligible ? (t('year_restricted') || 'Year Restricted') : (phase === 'PRE_ENROLLMENT' ? t('pre_enroll_btn') : t('enroll_btn')))}
+                                        </motion.button>
+                                    )}
+                                </div>
                             </motion.div>
                         );
                     })}

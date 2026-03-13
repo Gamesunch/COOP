@@ -12,6 +12,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
     const [newsContent, setNewsContent] = useState('');
     const [newsPosting, setNewsPosting] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const fetchDemand = async () => {
@@ -145,20 +146,45 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                 <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--color-primary)' }}>{t('admin_controls')}</h3>
                                 <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>{t('admin_controls_desc')}</p>
                             </div>
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <span style={{ fontWeight: 600 }}>{t('modify_phase')}</span>
-                                <select
-                                    value={adminPhase}
-                                    onChange={(e) => {
-                                        const newPhase = e.target.value;
-                                        setConfirmPhaseModal({ show: true, newPhase });
-                                    }}
-                                    style={{ padding: '0.6rem 1rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
-                                >
-                                    <option value="PRE_ENROLLMENT">{t('pre_enrollment')}</option>
-                                    <option value="ENROLLMENT">{t('active_enrollment')}</option>
-                                    <option value="CLOSED">{t('closed')}</option>
-                                </select>
+                            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                                {/* Course Search Bar */}
+                                <div style={{ position: 'relative' }}>
+                                    <input 
+                                        type="text" 
+                                        placeholder={t('search_courses') || "Search courses..."}
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        style={{
+                                            padding: '0.6rem 1rem 0.6rem 2.5rem',
+                                            borderRadius: '8px',
+                                            background: 'var(--color-bg-light)',
+                                            color: 'var(--color-text)',
+                                            border: '1px solid var(--glass-border)',
+                                            outline: 'none',
+                                            width: '250px',
+                                            fontSize: '0.9rem'
+                                        }}
+                                    />
+                                    <span style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                    </span>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <span style={{ fontWeight: 600 }}>{t('modify_phase')}</span>
+                                    <select
+                                        value={adminPhase}
+                                        onChange={(e) => {
+                                            const newPhase = e.target.value;
+                                            setConfirmPhaseModal({ show: true, newPhase });
+                                        }}
+                                        style={{ padding: '0.6rem 1rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
+                                    >
+                                        <option value="PRE_ENROLLMENT">{t('pre_enrollment')}</option>
+                                        <option value="ENROLLMENT">{t('active_enrollment')}</option>
+                                        <option value="CLOSED">{t('closed')}</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -177,7 +203,12 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {demandData.map(course => {
+                                    {demandData
+                                        .filter(course => 
+                                            course.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                            course.name.toLowerCase().includes(searchTerm.toLowerCase())
+                                        )
+                                        .map(course => {
                                         const c_cap = parseInt(course.capacity);
                                         const pre_en = parseInt(course.pre_enrolled_count);
                                         const isBottleneck = pre_en > c_cap;

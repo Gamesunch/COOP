@@ -29,6 +29,7 @@ export default function CourseManagement() {
         name: '',
         credits: 3,
         capacity: 30,
+        min_year: 1,
         professor_ids: [],
         room: '',
         description: ''
@@ -105,7 +106,7 @@ export default function CourseManagement() {
                 setCourses([...courses, data.course]);
                 setShowAddModal(false);
                 setNewCourse({
-                    code: '', name: '', credits: 3, capacity: 30,
+                    code: '', name: '', credits: 3, capacity: 30, min_year: 1,
                     professor_ids: [],
                     room: '', description: ''
                 });
@@ -128,6 +129,7 @@ export default function CourseManagement() {
             name: course.name,
             credits: course.credits,
             capacity: course.capacity,
+            min_year: course.min_year || 1,
             professor_ids: course.professors ? course.professors.map(p => p.id) : [],
             room: course.room || '',
             description: course.description || ''
@@ -295,6 +297,7 @@ export default function CourseManagement() {
                                     <th style={{ padding: '1rem', textAlign: 'center' }}>{t('instructor')}</th>
                                     <th style={{ padding: '1rem', textAlign: 'center' }}>{t('schedule')}</th>
                                     <th style={{ padding: '1rem', textAlign: 'center' }}>{t('room')}</th>
+                                    <th style={{ padding: '1rem', textAlign: 'center' }}>{t('min_year') || 'Min Year'}</th>
                                     <th style={{ padding: '1rem', textAlign: 'center' }}>{t('actions')}</th>
                                 </tr>
                             </thead>
@@ -309,6 +312,7 @@ export default function CourseManagement() {
                                         </td>
                                         <td style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem' }}>{course.schedule_time || t('tba')}</td>
                                         <td style={{ padding: '1rem', textAlign: 'center' }}>{course.room || t('tba')}</td>
+                                        <td style={{ padding: '1rem', textAlign: 'center' }}>{course.min_year}</td>
                                         <td style={{ padding: '1rem', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
                                             <button onClick={() => handleEditClick(course)} style={{ padding: '0.4rem', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '6px', cursor: 'pointer' }} title={t('edit_course')}>
                                                 <Edit2 size={16} />
@@ -355,14 +359,18 @@ export default function CourseManagement() {
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('description')}</label>
                             <textarea value={newCourse.description} onChange={e => setNewCourse({ ...newCourse, description: e.target.value })} className="input-field" style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', minHeight: '80px', fontFamily: 'inherit' }} />
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('capacity')}</label>
-                                <input type="number" value={newCourse.capacity} onChange={e => setNewCourse({ ...newCourse, capacity: parseInt(e.target.value) })} className="input-field" required style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)' }} />
+                                <input type="number" value={newCourse.capacity} onChange={e => setNewCourse({ ...newCourse, capacity: parseInt(e.target.value) })} className="input-field" required style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', width: '100%' }} />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('min_year') || 'Min Year'}</label>
+                                <input type="number" min="1" max="6" value={newCourse.min_year} onChange={e => setNewCourse({ ...newCourse, min_year: parseInt(e.target.value) })} className="input-field" required style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', width: '100%' }} />
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('room')}</label>
-                                <input type="text" value={newCourse.room} onChange={e => setNewCourse({ ...newCourse, room: e.target.value })} className="input-field" style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)' }} />
+                                <input type="text" value={newCourse.room} onChange={e => setNewCourse({ ...newCourse, room: e.target.value })} className="input-field" style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', width: '100%' }} />
                             </div>
                         </div>
                         <div style={{ marginBottom: '1.5rem' }}>
@@ -436,14 +444,18 @@ export default function CourseManagement() {
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('description')}</label>
                             <textarea value={newCourse.description} onChange={e => setNewCourse({ ...newCourse, description: e.target.value })} className="input-field" style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', minHeight: '80px', fontFamily: 'inherit' }} />
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('capacity')}</label>
-                                <input type="number" value={newCourse.capacity} onChange={e => setNewCourse({ ...newCourse, capacity: parseInt(e.target.value) })} className="input-field" required style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)' }} />
+                                <input type="number" value={newCourse.capacity} onChange={e => setNewCourse({ ...newCourse, capacity: parseInt(e.target.value) })} className="input-field" required style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', width: '100%' }} />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('min_year') || 'Min Year'}</label>
+                                <input type="number" min="1" max="6" value={newCourse.min_year} onChange={e => setNewCourse({ ...newCourse, min_year: parseInt(e.target.value) })} className="input-field" required style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', width: '100%' }} />
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('room')}</label>
-                                <input type="text" value={newCourse.room} onChange={e => setNewCourse({ ...newCourse, room: e.target.value })} className="input-field" style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)' }} />
+                                <input type="text" value={newCourse.room} onChange={e => setNewCourse({ ...newCourse, room: e.target.value })} className="input-field" style={{ padding: '0.8rem', borderRadius: '8px', background: 'var(--color-bg-light)', color: 'var(--color-text)', border: '1px solid var(--glass-border)', width: '100%' }} />
                             </div>
                         </div>
                         <div style={{ marginBottom: '1.5rem' }}>

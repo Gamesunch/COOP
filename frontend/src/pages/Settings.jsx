@@ -12,6 +12,7 @@ export default function Settings() {
     const { t } = useLanguage();
     const [user, setUser] = useState(null);
     const [bio, setBio] = useState('');
+    const [yearOfStudy, setYearOfStudy] = useState('');
     const [profilePictureUrl, setProfilePictureUrl] = useState('');
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -35,6 +36,7 @@ export default function Settings() {
                     const data = await res.json();
                     setUser(data);
                     setBio(data.bio || '');
+                    setYearOfStudy(data.yearOfStudy || '');
                     setProfilePictureUrl(data.profilePictureUrl || '');
                 } else {
                     console.error('Failed to fetch profile');
@@ -42,6 +44,7 @@ export default function Settings() {
                     const userStored = JSON.parse(localStorage.getItem('user'));
                     setUser(userStored);
                     setBio(userStored?.bio || '');
+                    setYearOfStudy(userStored?.yearOfStudy || '');
                     setProfilePictureUrl(userStored?.profilePictureUrl || '');
                 }
             } catch (err) {
@@ -53,7 +56,7 @@ export default function Settings() {
         fetchProfile();
     }, [navigate]);
 
-    const handleSaveBio = async () => {
+    const handleSaveProfile = async () => {
         setSaving(true);
         setMessage('');
         try {
@@ -64,14 +67,17 @@ export default function Settings() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ bio })
+                body: JSON.stringify({ bio, yearOfStudy })
             });
             if (res.ok) {
                 const data = await res.json();
                 setMessage(t('saved'));
                 // Update localStorage with new data
                 const stored = JSON.parse(localStorage.getItem('user'));
-                localStorage.setItem('user', JSON.stringify({ ...stored, bio: data.user.bio }));
+                localStorage.setItem('user', JSON.stringify({ 
+                    ...stored, 
+                    bio: data.user.bio
+                }));
                 setTimeout(() => setMessage(''), 3000);
             }
         } catch (err) {
@@ -234,8 +240,31 @@ export default function Settings() {
                             </div>
                         </div>
 
+                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div className="input-group" style={{ flex: 1 }}>
+                                <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', display: 'block' }}>{t('year_of_study')}</label>
+                                <select 
+                                    className="input-field" 
+                                    value={yearOfStudy} 
+                                    onChange={(e) => setYearOfStudy(e.target.value)}
+                                    style={{ width: '100%', background: 'var(--color-surface-hover)', cursor: 'not-allowed' }}
+                                    disabled
+                                >
+                                    <option value="">{t('select_year') || 'Select Year'}</option>
+                                    <option value="1">Year 1</option>
+                                    <option value="2">Year 2</option>
+                                    <option value="3">Year 3</option>
+                                    <option value="4">Year 4</option>
+                                    <option value="5">Year 5+</option>
+                                </select>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>
+                                    {t('year_locked_desc') || 'Year of study can only be changed by an administrator.'}
+                                </p>
+                            </div>
+                        </div>
+
                         <button
-                            onClick={handleSaveBio}
+                            onClick={handleSaveProfile}
                             className="btn btn-primary"
                             style={{ marginTop: '1rem', width: '100%', padding: '1rem' }}
                             disabled={saving}
@@ -267,17 +296,6 @@ export default function Settings() {
                                 type="text"
                                 className="input-field"
                                 value={user.major || 'Not set'}
-                                disabled
-                                style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)', cursor: 'not-allowed' }}
-                            />
-                        </div>
-
-                        <div className="input-group" style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', display: 'block' }}>{t('year_of_study')}</label>
-                            <input
-                                type="text"
-                                className="input-field"
-                                value={user.yearOfStudy || 'Not set'}
                                 disabled
                                 style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)', cursor: 'not-allowed' }}
                             />
