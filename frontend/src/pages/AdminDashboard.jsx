@@ -8,6 +8,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
     const { t } = useLanguage();
     const [demandData, setDemandData] = useState([]);
     const [confirmPhaseModal, setConfirmPhaseModal] = useState({ show: false, newPhase: null });
+    const [capacityModal, setCapacityModal] = useState({ show: false, course: null, newCapacity: '' });
     const [stats, setStats] = useState({ totalCourses: 0, overSubscribed: 0 });
     const [newsTitle, setNewsTitle] = useState('');
     const [newsContent, setNewsContent] = useState('');
@@ -57,6 +58,36 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
 
         setConfirmPhaseModal({ show: false, newPhase: null });
         window.location.reload();
+    };
+
+    const handleCapacityUpdate = async () => {
+        const { course, newCapacity } = capacityModal;
+        if (!course || !newCapacity) return;
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/admin/courses/${course.id}/capacity`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ capacity: parseInt(newCapacity) })
+            });
+
+            if (res.ok) {
+                // Refresh demand data
+                const demandRes = await fetch(`${API_BASE_URL}/api/admin/demand`, { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                if (demandRes.ok) {
+                    setDemandData(await demandRes.json());
+                }
+                setCapacityModal({ show: false, course: null, newCapacity: '' });
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to update capacity');
+            }
+        } catch (error) {
+            console.error('Error updating capacity:', error);
+            alert('Failed to update capacity');
+        }
     };
 
     const handlePostNews = async (e) => {
@@ -220,26 +251,14 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                                 <td style={{ padding: '0.8rem', textAlign: 'center', color: isBottleneck ? '#ef4444' : 'var(--color-text)', fontWeight: isBottleneck ? 700 : 500 }}>
                                                     {course.pre_enrolled_count} {isBottleneck && '⚠️'}
                                                 </td>
-                                                <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.waitlisted_count}</td>
                                                 <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.enrolled_count}</td>
                                                 <td style={{ padding: '0.8rem', textAlign: 'right' }}>
                                                     <button
-                                                        onClick={async () => {
-                                                            const newCap = prompt(`Enter new capacity for ${course.code} (Current: ${course.capacity}):`, course.capacity);
-                                                            if (newCap && !isNaN(newCap)) {
-                                                                await fetch(`${API_BASE_URL}/api/admin/courses/${course.id}/capacity`, {
-                                                                    method: 'PUT',
-                                                                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                                                                    body: JSON.stringify({ capacity: parseInt(newCap) })
-                                                                });
-
-                                                                // Refresh demand data
-                                                                const demandRes = await fetch(`${API_BASE_URL}/api/admin/demand`, { headers: { 'Authorization': `Bearer ${token}` } });
-                                                                if (demandRes.ok) {
-                                                                    setDemandData(await demandRes.json());
-                                                                }
-                                                            }
-                                                        }}
+                                                        onClick={() => setCapacityModal({ 
+                                                            show: true, 
+                                                            course: course, 
+                                                            newCapacity: course.capacity.toString() 
+                                                        })}
                                                         style={{ padding: '0.4rem 0.8rem', background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}>
                                                         {t('edit_cap')}
                                                     </button>
@@ -312,6 +331,56 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                             </button>
                             <button className="btn" onClick={executePhaseChange}
                                 style={{ flex: 1, padding: '0.8rem', background: '#ef4444', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(239, 68, 68, 0.3)' }}>
+                                {t('confirm')}
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+            {/* Capacity Update Modal */}
+            {capacityModal.show && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }}>
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-panel"
+                        style={{ padding: '2rem', borderRadius: '16px', maxWidth: '400px', width: '90%', textAlign: 'center' }}>
+                        <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(var(--color-primary-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+                            <Settings size={30} color="var(--color-primary)" />
+                        </div>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text)' }}>
+                            {t('edit_cap')}
+                        </h3>
+                        <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
+                            {capacityModal.course.code} - {capacityModal.course.name}
+                        </p>
+                        
+                        <div style={{ marginBottom: '2rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-muted)', textAlign: 'left' }}>
+                                {t('capacity')}
+                            </label>
+                            <input 
+                                type="number" 
+                                value={capacityModal.newCapacity}
+                                onChange={(e) => setCapacityModal({ ...capacityModal, newCapacity: e.target.value })}
+                                style={{
+                                    width: '100%', padding: '0.8rem', borderRadius: '10px',
+                                    background: 'var(--color-bg-light)', color: 'var(--color-text)',
+                                    border: '1px solid var(--glass-border)', fontSize: '1.1rem', fontWeight: 600,
+                                    textAlign: 'center', outline: 'none'
+                                }}
+                                autoFocus
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button className="btn" onClick={() => setCapacityModal({ show: false, course: null, newCapacity: '' })}
+                                style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--color-border-light)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
+                                {t('cancel')}
+                            </button>
+                            <button className="btn" onClick={handleCapacityUpdate}
+                                style={{ flex: 1, padding: '0.8rem', background: 'var(--color-primary)', border: 'none', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 10px rgba(var(--color-primary-rgb), 0.3)' }}>
                                 {t('confirm')}
                             </button>
                         </div>
