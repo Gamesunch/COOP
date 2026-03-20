@@ -26,12 +26,12 @@ export default function StudyPath() {
     }, []);
 
     const tracks = useMemo(() => {
-        const uniqueTracks = [...new Set(courses.map(c => c.track))].filter(t => t !== 'CORE' && t !== 'OUTSIDE');
+        const uniqueTracks = [...new Set(courses.map(c => c.track))].filter(tr => tr && tr !== 'CORE' && tr !== 'OUTSIDE');
         return ['ALL', ...uniqueTracks, 'OUTSIDE'];
     }, [courses]);
 
     const filteredCourses = useMemo(() => {
-        if (selectedTrack === 'ALL') return courses.filter(c => c.track === 'CORE' || c.track === 'OUTSIDE' || c.track === 'ALL');
+        if (selectedTrack === 'ALL') return courses.filter(c => c.track === 'CORE' || c.track === 'OUTSIDE' || c.track === 'ALL' || !c.track);
         return courses.filter(c => c.track === 'CORE' || c.track === selectedTrack);
     }, [courses, selectedTrack]);
 
@@ -102,7 +102,7 @@ export default function StudyPath() {
         const newLines = [];
 
         filteredCourses.forEach(course => {
-            if (course.prerequisites && course.prerequisites.length > 0) {
+            if (course.prerequisites && Array.isArray(course.prerequisites) && course.prerequisites.length > 0) {
                 const targetEl = cardRefs.current[course.id];
                 if (!targetEl) return;
                 const targetRect = targetEl.getBoundingClientRect();
@@ -252,7 +252,7 @@ export default function StudyPath() {
                                     }}
                                 >
                                     {trackItem === 'ALL' ? <Filter size={12} /> : null}
-                                    {t(trackItem.toLowerCase())}
+                                    {trackItem ? t(trackItem.toLowerCase()) : trackItem}
                                 </button>
                             ))}
                         </div>
