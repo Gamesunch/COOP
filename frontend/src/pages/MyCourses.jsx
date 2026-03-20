@@ -206,7 +206,7 @@ export default function MyCourses() {
                 </motion.div>
 
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid rgba(0,0,0,0.06)', paddingBottom: '0' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--color-border-subtle)', paddingBottom: '0' }}>
                     {tabs.map(tab => (
                         <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                             style={{
@@ -295,16 +295,16 @@ export default function MyCourses() {
                                 <Download size={16} /> {t('download_timetable')}
                             </motion.button>
                         </div>
-                        <div ref={timetableRef} style={{ background: '#FAFAFA', borderRadius: '16px', padding: '1.5rem', overflow: 'auto' }}>
-                            <h3 style={{ textAlign: 'center', fontWeight: 700, fontSize: '1.2rem', marginBottom: '1rem', color: '#262526' }}>{t('tab_timetable')}</h3>
+                        <div ref={timetableRef} style={{ background: 'var(--color-bg-dark)', borderRadius: '16px', padding: '1.5rem', overflow: 'auto' }}>
+                            <h3 style={{ textAlign: 'center', fontWeight: 700, fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--color-text)' }}>{t('tab_timetable')}</h3>
                             <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(30, 1fr)', fontSize: '0.72rem', minWidth: '1100px' }}>
                                 {/* Header Row */}
-                                <div style={{ padding: '0.5rem', fontWeight: 700, textAlign: 'center', background: '#F3F4F6', color: '#4B5563', borderRadius: '8px 0 0 0', fontSize: '0.72rem', borderBottom: '1px solid #E5E7EB', borderRight: '1px solid #E5E7EB' }}>{t('day_time')}</div>
+                                <div style={{ padding: '0.5rem', fontWeight: 700, textAlign: 'center', background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)', borderRadius: '8px 0 0 0', fontSize: '0.72rem', borderBottom: '1px solid var(--glass-border)', borderRight: '1px solid var(--glass-border)' }}>{t('day_time')}</div>
                                 {HALF_HOURS.map((slot, i) => (
                                     <div key={i} style={{
-                                        padding: '0.4rem 0', fontWeight: slot.min === 0 ? 700 : 500, textAlign: 'center', background: '#F3F4F6', color: '#4B5563',
-                                        fontSize: slot.min === 0 ? '0.68rem' : '0.58rem', borderLeft: slot.min === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
-                                        borderBottom: '1px solid #E5E7EB',
+                                        padding: '0.4rem 0', fontWeight: slot.min === 0 ? 700 : 500, textAlign: 'center', background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)',
+                                        fontSize: slot.min === 0 ? '0.68rem' : '0.58rem', borderLeft: slot.min === 0 ? '1px solid var(--color-border-subtle)' : 'none',
+                                        borderBottom: '1px solid var(--glass-border)',
                                         borderRadius: i === HALF_HOURS.length - 1 ? '0 8px 0 0' : '0', opacity: slot.min === 0 ? 1 : 0.7
                                     }}>
                                         {`${slot.hour.toString().padStart(2, '0')}:${slot.min === 0 ? '00' : '30'}`}
@@ -315,18 +315,18 @@ export default function MyCourses() {
                                 {DAYS.map((day, dayIdx) => (
                                     <React.Fragment key={day}>
                                         <div style={{
-                                            padding: '0.6rem 0.4rem', fontWeight: 700, textAlign: 'center', background: dayIdx % 2 === 0 ? '#fff' : '#f9f9f9',
-                                            borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#333'
+                                            padding: '0.6rem 0.4rem', fontWeight: 700, textAlign: 'center', background: dayIdx % 2 === 0 ? 'var(--color-table-row-even)' : 'var(--color-table-row-odd)',
+                                            borderBottom: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: 'var(--color-text)'
                                         }}>{getDayLabel(day, t)}</div>
                                         <div style={{
                                             gridColumn: '2 / -1', position: 'relative', minHeight: '56px',
-                                            background: dayIdx % 2 === 0 ? '#fff' : '#f9f9f9', borderBottom: '1px solid #eee',
+                                            background: dayIdx % 2 === 0 ? 'var(--color-table-row-even)' : 'var(--color-table-row-odd)', borderBottom: '1px solid var(--glass-border)',
                                             display: 'grid', gridTemplateColumns: 'repeat(30, 1fr)'
                                         }}>
                                             {/* Grid lines — solid on hour, solid lighter on half */}
                                             {HALF_HOURS.map((slot, i) => (
                                                 <div key={i} style={{
-                                                    borderRight: slot.min === 0 ? '1px solid rgba(0,0,0,0.1)' : '1px solid rgba(0,0,0,0.04)',
+                                                    borderRight: slot.min === 0 ? '1px solid var(--color-border-light)' : '1px solid var(--color-border-subtle)',
                                                     minHeight: '56px'
                                                 }}></div>
                                             ))}
@@ -338,7 +338,7 @@ export default function MyCourses() {
                                                     <div key={i} style={{
                                                         position: 'absolute', left: `${left}%`, width: `${width}%`, top: '4px', bottom: '4px',
                                                         backgroundColor: block.color.bg,
-                                                        borderRadius: '8px', border: '1px solid rgba(0,0,0,0.05)',
+                                                        borderRadius: '8px', border: '1px solid var(--color-border-subtle)',
                                                         padding: '3px 6px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
                                                         overflow: 'hidden', zIndex: 2, cursor: 'default'
                                                     }}
@@ -379,7 +379,7 @@ export default function MyCourses() {
                                     </thead>
                                     <tbody>
                                         {enrollments.map((course, i) => (
-                                            <tr key={course.enrollment_id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
+                                            <tr key={course.enrollment_id} style={{ borderBottom: '1px solid var(--color-border-subtle)', background: i % 2 === 0 ? 'var(--color-table-row-even)' : 'var(--color-table-row-odd)' }}>
                                                 <td style={{ padding: '0.9rem 1rem' }}>
                                                     <span style={{ fontWeight: 700, color: 'var(--color-primary)', background: 'rgba(242, 159, 5, 0.12)', padding: '3px 10px', borderRadius: '6px', fontSize: '0.8rem' }}>{course.code}</span>
                                                 </td>
@@ -393,7 +393,7 @@ export default function MyCourses() {
                                                 </td>
                                             </tr>
                                         ))}
-                                        <tr style={{ background: 'rgba(242, 159, 5, 0.08)', fontWeight: 700 }}>
+                                        <tr style={{ background: 'var(--color-table-header-bg)', fontWeight: 700 }}>
                                             <td colSpan={2} style={{ padding: '0.9rem 1rem', textAlign: 'center' }}>{t('total')} {enrollments.length} {t('enrolled_courses_count')}</td>
                                             <td style={{ padding: '0.9rem 1rem', textAlign: 'center', color: 'var(--color-primary)', fontSize: '1.1rem' }}>{totalCredits}</td>
                                             <td colSpan={2}></td>
@@ -425,7 +425,7 @@ export default function MyCourses() {
                             </p>
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <button className="btn" onClick={() => setConfirmDropModalId(null)}
-                                    style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
+                                    style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--color-border-light)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
                                     {t('cancel')}
                                 </button>
                                 <button className="btn" onClick={executeDrop}
@@ -460,7 +460,7 @@ export default function MyCourses() {
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     {courseAnnouncements.map(ann => (
-                                        <div key={ann.id} style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <div key={ann.id} style={{ padding: '1.2rem', background: 'var(--color-surface-hover)', borderRadius: '10px', border: '1px solid var(--glass-border)' }}>
                                             <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--color-primary)' }}>{ann.title}</h4>
                                             <p style={{ color: 'var(--color-text)', fontSize: '0.95rem', marginBottom: '0.8rem', lineHeight: 1.5 }}>{ann.content}</p>
                                             <small style={{ color: 'var(--color-text-muted)', opacity: 0.7 }}>

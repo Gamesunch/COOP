@@ -306,7 +306,7 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                         </p>
                         <div style={{ display: 'flex', gap: '1rem' }}>
                             <button className="btn" onClick={() => setConfirmPhaseModal({ show: false, newPhase: null })}
-                                style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
+                                style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: '1px solid var(--color-border-light)', color: 'var(--color-text)', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}>
                                 {t('cancel')}
                             </button>
                             <button className="btn" onClick={executePhaseChange}

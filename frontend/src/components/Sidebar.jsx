@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Award, Layers } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Award, Layers, Moon, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Sidebar({ activePath }) {
     const navigate = useNavigate();
     const { t } = useLanguage();
+    const { theme, toggleTheme } = useTheme();
     const [phase, setPhase] = useState('ENROLLMENT');
     const [userRole, setUserRole] = useState(null); // Default to null to prevent flash of student items
 
@@ -136,7 +138,24 @@ export default function Sidebar({ activePath }) {
             </nav>
 
             <div style={{ marginTop: 'auto', padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <LanguageSwitcher style={{ width: '100%', justifyContent: 'center' }} />
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <LanguageSwitcher style={{ flex: 1, justifyContent: 'center' }} />
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={toggleTheme}
+                        className="glass-panel"
+                        style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            width: '44px', height: '44px', border: '1px solid rgba(234, 88, 12, 0.4)',
+                            background: 'rgba(10, 10, 10, 0.7)', color: 'var(--color-primary)',
+                            borderRadius: '50%', cursor: 'pointer', transition: 'all 0.3s ease',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+                        }}
+                    >
+                        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                    </motion.button>
+                </div>
                 <motion.button
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(244, 63, 94, 0.2)' }}
                     whileTap={{ scale: 0.98 }}

@@ -176,7 +176,7 @@ export default function ProfessorDashboard() { // Removed 'token' prop
                                 <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>{t('no_classes_today')}</p>
                             ) : (
                                 todayClasses.map(course => (
-                                    <div key={course.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div key={course.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', padding: '0.8rem', background: 'var(--color-surface-hover)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
                                         <div style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.95rem', minWidth: '45px' }}>{course.startTime}</div>
                                         <div>
                                             <div style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--color-text)' }}>{course.code}</div>
@@ -198,7 +198,7 @@ export default function ProfessorDashboard() { // Removed 'token' prop
                                 <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>{t('no_announcements')}</p>
                             ) : (
                                 announcements.map(ann => (
-                                    <div key={ann.id} style={{ minWidth: '300px', maxWidth: '300px', padding: '1.2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div key={ann.id} style={{ minWidth: '300px', maxWidth: '300px', padding: '1.2rem', background: 'var(--color-surface-hover)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
                                         <div style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-primary)', background: 'rgba(242, 159, 5, 0.12)', padding: '2px 8px', borderRadius: '4px', marginBottom: '0.5rem' }}>{ann.course_code}</div>
                                         <h4 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ann.title}</h4>
                                         <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '0.8rem' }}>{ann.content}</p>
@@ -217,15 +217,15 @@ export default function ProfessorDashboard() { // Removed 'token' prop
                                 {t('download')} <Download size={16} />
                             </button>
                         </div>
-                        <div ref={timetableRef} style={{ background: '#FAFAFA', borderRadius: '16px', padding: '1.5rem', overflow: 'auto' }}>
+                        <div ref={timetableRef} style={{ background: 'var(--color-bg-dark)', borderRadius: '16px', padding: '1.5rem', overflow: 'auto' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(30, 1fr)', fontSize: '0.72rem', minWidth: '1100px' }}>
                                 {/* Header Row */}
-                                <div style={{ padding: '0.5rem', fontWeight: 700, textAlign: 'center', background: '#F3F4F6', color: '#4B5563', borderRadius: '8px 0 0 0', fontSize: '0.72rem', borderBottom: '1px solid #E5E7EB', borderRight: '1px solid #E5E7EB' }}>{t('day_time')}</div>
+                                <div style={{ padding: '0.5rem', fontWeight: 700, textAlign: 'center', background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)', borderRadius: '8px 0 0 0', fontSize: '0.72rem', borderBottom: '1px solid var(--glass-border)', borderRight: '1px solid var(--glass-border)' }}>{t('day_time')}</div>
                                 {HALF_HOURS.map((slot, i) => (
                                     <div key={i} style={{
-                                        padding: '0.4rem 0', fontWeight: slot.min === 0 ? 700 : 500, textAlign: 'center', background: '#F3F4F6', color: '#4B5563',
-                                        fontSize: slot.min === 0 ? '0.68rem' : '0.58rem', borderLeft: slot.min === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
-                                        borderBottom: '1px solid #E5E7EB',
+                                        padding: '0.4rem 0', fontWeight: slot.min === 0 ? 700 : 500, textAlign: 'center', background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)',
+                                        fontSize: slot.min === 0 ? '0.68rem' : '0.58rem', borderLeft: slot.min === 0 ? '1px solid var(--color-border-subtle)' : 'none',
+                                        borderBottom: '1px solid var(--glass-border)',
                                         borderRadius: i === HALF_HOURS.length - 1 ? '0 8px 0 0' : '0', opacity: slot.min === 0 ? 1 : 0.7
                                     }}>
                                         {`${slot.hour.toString().padStart(2, '0')}:${slot.min === 0 ? '00' : '30'}`}
@@ -236,18 +236,18 @@ export default function ProfessorDashboard() { // Removed 'token' prop
                                 {DAYS.map((day, dayIdx) => (
                                     <React.Fragment key={day}>
                                         <div style={{
-                                            padding: '0.6rem 0.4rem', fontWeight: 700, textAlign: 'center', background: dayIdx % 2 === 0 ? '#fff' : '#f9f9f9',
-                                            borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#333'
+                                            padding: '0.6rem 0.4rem', fontWeight: 700, textAlign: 'center', background: dayIdx % 2 === 0 ? 'var(--color-table-row-even)' : 'var(--color-table-row-odd)',
+                                            borderBottom: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: 'var(--color-text)'
                                         }}>{t(day.toLowerCase())}</div>
                                         <div style={{
                                             gridColumn: '2 / -1', position: 'relative', minHeight: '64px',
-                                            background: dayIdx % 2 === 0 ? '#fff' : '#f9f9f9', borderBottom: '1px solid #eee',
+                                            background: dayIdx % 2 === 0 ? 'var(--color-table-row-even)' : 'var(--color-table-row-odd)', borderBottom: '1px solid var(--glass-border)',
                                             display: 'grid', gridTemplateColumns: 'repeat(30, 1fr)'
                                         }}>
                                             {/* Grid lines */}
                                             {HALF_HOURS.map((slot, i) => (
                                                 <div key={i} style={{
-                                                    borderRight: slot.min === 0 ? '1px solid rgba(0,0,0,0.1)' : '1px solid rgba(0,0,0,0.04)',
+                                                    borderRight: slot.min === 0 ? '1px solid var(--color-border-light)' : '1px solid var(--color-border-subtle)',
                                                     minHeight: '64px'
                                                 }}></div>
                                             ))}
@@ -259,7 +259,7 @@ export default function ProfessorDashboard() { // Removed 'token' prop
                                                     <div key={i} onClick={() => navigate(`/professor/courses/${block.id}`)} style={{
                                                         position: 'absolute', left: `${left}%`, width: `${width}%`, top: '4px', bottom: '4px',
                                                         backgroundColor: block.color.bg,
-                                                        borderRadius: '8px', border: '1px solid rgba(0,0,0,0.05)',
+                                                        borderRadius: '8px', border: '1px solid var(--color-border-subtle)',
                                                         padding: '6px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
                                                         overflow: 'hidden', zIndex: 2, cursor: 'pointer', transition: 'transform 0.2s',
                                                     }}

@@ -88,8 +88,8 @@ export default function Grades() {
                     <div style={{ position: 'relative' }}>
                         <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}
                             style={{
-                                appearance: 'none', padding: '0.6rem 2.5rem 0.6rem 1rem', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.1)',
-                                background: 'white', fontFamily: 'var(--font-main)', fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer', color: 'var(--color-text)'
+                                appearance: 'none', padding: '0.6rem 2.5rem 0.6rem 1rem', borderRadius: '10px', border: '1px solid var(--color-border-light)',
+                                background: 'var(--color-bg-light)', fontFamily: 'var(--font-main)', fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer', color: 'var(--color-text)'
                             }}>
                             <option value="all">{t('all_years')}</option>
                             {years.map(y => <option key={y} value={y}>{t('academic_year')} {y}</option>)}
@@ -120,7 +120,7 @@ export default function Grades() {
                                 </div>
                                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.92rem' }}>
                                     <thead>
-                                        <tr style={{ background: 'rgba(242, 159, 5, 0.06)' }}>
+                                        <tr style={{ background: 'var(--color-table-header-bg)' }}>
                                             <th style={{ padding: '0.8rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{t('course_code')}</th>
                                             <th style={{ padding: '0.8rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{t('course_name_label')}</th>
                                             <th style={{ padding: '0.8rem 1rem', textAlign: 'center', fontWeight: 600, color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{t('credits')}</th>
@@ -129,7 +129,7 @@ export default function Grades() {
                                     </thead>
                                     <tbody>
                                         {sem.courses.map((course, i) => (
-                                            <tr key={course.enrollment_id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
+                                            <tr key={course.enrollment_id} style={{ borderBottom: '1px solid var(--color-border-subtle)', background: i % 2 === 0 ? 'var(--color-table-row-even)' : 'var(--color-table-row-odd)' }}>
                                                 <td style={{ padding: '0.8rem 1rem' }}>
                                                     <span style={{ fontWeight: 700, color: 'var(--color-primary)', background: 'rgba(242, 159, 5, 0.12)', padding: '3px 10px', borderRadius: '6px', fontSize: '0.8rem' }}>{course.code}</span>
                                                 </td>
@@ -146,7 +146,7 @@ export default function Grades() {
                                             </tr>
                                         ))}
                                         {/* Summary Row */}
-                                        <tr style={{ background: 'rgba(242, 159, 5, 0.06)', fontWeight: 600 }}>
+                                        <tr style={{ background: 'var(--color-table-header-bg)', fontWeight: 600 }}>
                                             <td colSpan={2} style={{ padding: '0.8rem 1rem', textAlign: 'right', color: 'var(--color-text-muted)' }}>
                                                 {sem.courses.length} {t('enrolled_courses_count')}
                                             </td>

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, ArrowRight, Mail, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, ArrowRight, Mail, Eye, EyeOff, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function Register() {
     const navigate = useNavigate();
     const { t } = useLanguage();
+    const { theme, toggleTheme } = useTheme();
     const [role, setRole] = useState('STUDENT');
 
     const [firstName, setFirstName] = useState('');
@@ -52,7 +54,24 @@ export default function Register() {
     return (
         <div className="flex-center" style={{ minHeight: '100vh', padding: '2rem', position: 'relative', background: 'var(--color-bg-dark)' }}>
 
-            <LanguageSwitcher style={{ position: 'absolute', top: '2rem', left: '2rem' }} />
+            <div style={{ position: 'absolute', top: '2rem', left: '2rem', display: 'flex', gap: '0.5rem' }}>
+                <LanguageSwitcher />
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={toggleTheme}
+                    className="glass-panel"
+                    style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: '44px', height: '44px', border: '1px solid rgba(234, 88, 12, 0.4)',
+                        background: 'rgba(10, 10, 10, 0.7)', color: 'var(--color-primary)',
+                        borderRadius: '50%', cursor: 'pointer', transition: 'all 0.3s ease',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+                    }}
+                >
+                    {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                </motion.button>
+            </div>
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 30 }}

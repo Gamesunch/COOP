@@ -15,7 +15,35 @@
   --glass-border: rgba(115, 114, 114, 0.15);
   --glass-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 
+  --color-table-row-even: #ffffff;
+  --color-table-row-odd: #fafafa;
+  --color-table-header-bg: rgba(242, 159, 5, 0.06);
+  --color-border-subtle: rgba(0, 0, 0, 0.04);
+  --color-border-light: rgba(0, 0, 0, 0.1);
+
   --font-main: 'Outfit', 'Noto Sans Thai', sans-serif;
+}
+
+[data-theme="dark"] {
+  --color-primary: #F29F05;
+  --color-primary-dark: #e08e00;
+  --color-secondary: #3BB5FF;
+  --color-accent: #F2CA7E;
+  --color-bg-dark: #0A0B0D;
+  --color-bg-light: #1C2026;
+  --color-surface: rgba(28, 32, 38, 0.95);
+  --color-surface-hover: rgba(45, 53, 64, 1);
+  --color-text: #E8E9EA;
+  --color-text-muted: #A4A5A6;
+
+  --glass-border: rgba(164, 165, 166, 0.15);
+  --glass-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+
+  --color-table-row-even: #1C2026;
+  --color-table-row-odd: #161a1f;
+  --color-table-header-bg: rgba(242, 159, 5, 0.08);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-light: rgba(255, 255, 255, 0.12);
 }
 
 * {
@@ -172,4 +200,19 @@ h6 {
   );
   background-size: 800px 100%;
   animation: shimmer 1.5s ease-in-out infinite;
+}
+
+[data-theme="dark"] .skeleton-shimmer {
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0.04) 25%, 
+    rgba(255,255,255,0.08) 50%, 
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 800px 100%;
+}
+
+/* Dark mode input/select styling */
+[data-theme="dark"] select option {
+  background: var(--color-bg-light);
+  color: var(--color-text);
 }

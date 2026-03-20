@@ -13,10 +13,12 @@ import ProfessorCourses from './pages/ProfessorCourses';
 import ProfessorClassDetails from './pages/ProfessorClassDetails';
 import StudyPath from './pages/StudyPath';
 import { LanguageProvider } from './context/LanguageContext';
+import { ThemeProvider } from './context/ThemeContext';
 import './index.css';
 
 function App() {
   return (
+    <ThemeProvider>
     <LanguageProvider>
       <Router>
         <Routes>
@@ -37,6 +39,7 @@ function App() {
         </Routes>
       </Router>
     </LanguageProvider>
+    </ThemeProvider>
   );
 }
 
