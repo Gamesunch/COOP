@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import StudentDashboard from './StudentDashboard';
 import AdminDashboard from './AdminDashboard';
+import { DashboardSkeleton } from '../components/SkeletonLoader';
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -140,7 +141,7 @@ export default function Dashboard() {
     }, [navigate]);
 
     if (loading) {
-        return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}>{t('loading')}</div>;
+        return <DashboardSkeleton />;
     }
 
     // If not loading but user is still null (e.g., failed to fetch user), redirect or show error

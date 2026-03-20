@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Download, Save } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { ProfessorClassDetailsSkeleton } from '../components/SkeletonLoader';
 
 export default function ProfessorClassDetails() {
     const { t } = useLanguage();
@@ -151,7 +152,7 @@ export default function ProfessorClassDetails() {
                         </div>
                     </header>
                     {loading ? (
-                        <p>{t('loading')}</p>
+                        <ProfessorClassDetailsSkeleton />
                     ) : (
                         <div className="glass-panel" style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>

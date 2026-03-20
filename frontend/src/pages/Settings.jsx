@@ -4,6 +4,7 @@ import { LayoutDashboard, BookOpen, Users, Settings as SettingsIcon, LogOut, Cam
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
+import { SettingsPageSkeleton } from '../components/SkeletonLoader';
 
 const API_BASE = 'http://localhost:5000';
 
@@ -128,7 +129,7 @@ export default function Settings() {
         navigate('/login');
     };
 
-    if (!user) return <div className="flex-center" style={{ height: '100vh', color: 'var(--color-text)' }}>{t('loading')}</div>;
+    if (!user) return <SettingsPageSkeleton />;
 
     const avatarLetter = user.firstName ? user.firstName[0].toUpperCase() : 'U';
     const fullPictureUrl = profilePictureUrl ? `${API_BASE}${profilePictureUrl}` : '';

@@ -4,6 +4,7 @@ import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Clock, MapPin, User
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
+import { MyCoursesPageSkeleton } from '../components/SkeletonLoader';
 import html2canvas from 'html2canvas';
 
 const API_BASE = 'http://localhost:5000';
@@ -139,7 +140,7 @@ export default function MyCourses() {
 
     const totalCredits = enrollments.reduce((sum, e) => sum + (e.credits || 0), 0);
 
-    if (loading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}>{t('loading')}</div>;
+    if (loading) return <MyCoursesPageSkeleton />;
 
     const avatarLetter = user?.firstName ? user.firstName[0].toUpperCase() : 'U';
     const fullPictureUrl = user?.profilePictureUrl ? `${API_BASE}${user.profilePictureUrl}` : '';

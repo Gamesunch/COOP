@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Users } from 'lucide-react';
+import { Bell, Users, Search, X } from 'lucide-react';
+import { TablePageSkeleton } from '../components/SkeletonLoader';
 
 export default function StudentManagement() {
     const navigate = useNavigate();
     const { t } = useLanguage();
     const [user, setUser] = useState(null);
     const [students, setStudents] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         fetchData();
@@ -110,7 +112,13 @@ export default function StudentManagement() {
         document.body.removeChild(a);
     };
 
-    if (!user) return <div className="flex-center" style={{ height: '100vh', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{t('loading')}</div>;
+    const filteredStudents = useMemo(() => students.filter(s =>
+        (s.student_id && s.student_id.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        `${s.first_name} ${s.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (s.email && s.email.toLowerCase().includes(searchQuery.toLowerCase()))
+    ), [students, searchQuery]);
+
+    if (!user) return <TablePageSkeleton cols={6} />;
 
     return (
         <div style={{ display: 'flex', height: '100vh', background: 'var(--color-bg-dark)', overflow: 'hidden' }}>
@@ -133,7 +141,7 @@ export default function StudentManagement() {
                 </motion.header>
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-panel" style={{ padding: '2.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <h3 style={{ fontSize: '1.4rem', fontWeight: 600 }}>{t('all_students')}</h3>
                         <button className="btn"
                             onClick={handleExportCSV}
@@ -146,6 +154,13 @@ export default function StudentManagement() {
                             }}>
                             {t('download_csv')}
                         </button>
+                    </div>
+                    {/* Search Bar */}
+                    <div style={{ display: 'flex', alignItems: 'center', padding: '0.7rem 1.2rem', borderRadius: '50px', marginBottom: '1.5rem', background: 'var(--color-bg-light)', border: '1px solid var(--glass-border)' }}>
+                        <Search size={18} color="var(--color-text-muted)" />
+                        <input type="text" placeholder={t('search_students') || 'Search students...'} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--color-text)', marginLeft: '0.8rem', padding: '0.3rem', fontFamily: 'var(--font-main)', fontSize: '0.95rem', flex: 1 }} />
+                        {searchQuery && <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '2px' }}><X size={16} /></button>}
                     </div>
 
                     <div style={{ overflowX: 'auto', background: 'var(--color-bg-light)', borderRadius: '12px', padding: '1rem', flex: 1 }}>
@@ -166,7 +181,7 @@ export default function StudentManagement() {
                                         <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>{t('no_students_found')}</td>
                                     </tr>
                                 ) : (
-                                    students.map(student => (
+                                    filteredStudents.map(student => (
                                         <tr key={student.id} style={{ borderBottom: '1px solid var(--glass-border)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--color-surface-hover)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                             <td style={{ padding: '1rem', fontWeight: 600, color: 'var(--color-primary)' }}>{student.student_id ? student.student_id : 'N/A'}</td>
                                             <td style={{ padding: '1rem', fontWeight: 500 }}>{student.first_name} {student.last_name}</td>

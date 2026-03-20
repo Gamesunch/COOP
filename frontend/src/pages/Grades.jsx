@@ -4,6 +4,7 @@ import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Award, ChevronDown 
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
+import { GradesPageSkeleton } from '../components/SkeletonLoader';
 
 const API_BASE = 'http://localhost:5000';
 
@@ -39,7 +40,7 @@ export default function Grades() {
 
     const handleLogout = () => { localStorage.removeItem('token'); localStorage.removeItem('user'); navigate('/login'); };
 
-    if (loading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}>{t('loading')}</div>;
+    if (loading) return <GradesPageSkeleton />;
 
     const avatarLetter = user?.firstName ? user.firstName[0].toUpperCase() : 'U';
     const fullPictureUrl = user?.profilePictureUrl ? `${API_BASE}${user.profilePictureUrl}` : '';

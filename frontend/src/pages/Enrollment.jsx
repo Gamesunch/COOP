@@ -4,6 +4,7 @@ import { LayoutDashboard, BookOpen, Users, Settings, LogOut, Search, BookPlus, C
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
+import { CardGridSkeleton } from '../components/SkeletonLoader';
 
 const API_BASE = 'http://localhost:5000';
 
@@ -104,7 +105,7 @@ export default function Enrollment() {
         c.code.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    if (loading) return <div className="flex-center" style={{ height: '100vh', color: 'var(--color-text)' }}>{t('loading')}</div>;
+    if (loading) return <CardGridSkeleton cards={6} />;
 
     const avatarLetter = user?.firstName ? user.firstName[0].toUpperCase() : 'U';
     const fullPictureUrl = user?.profilePictureUrl ? `${API_BASE}${user.profilePictureUrl}` : '';

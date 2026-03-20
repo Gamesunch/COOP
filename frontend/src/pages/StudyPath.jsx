@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar';
 
 const API_BASE = 'http://localhost:5000';
 import { useLanguage } from '../context/LanguageContext';
+import { StudyPathSkeleton } from '../components/SkeletonLoader';
 
 export default function StudyPath() {
     const { t } = useLanguage();
@@ -199,7 +200,7 @@ export default function StudyPath() {
         }
     };
 
-    if (loading) return <div className="flex-center" style={{ height: '100vh', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{t('loading_curriculum')}</div>;
+    if (loading) return <StudyPathSkeleton />;
 
     return (
         <div style={{ display: 'flex', width: '100%', minHeight: '100vh', background: 'var(--color-bg-dark)' }}>

@@ -5,6 +5,7 @@ import { BookOpen, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { ProfessorCoursesPageSkeleton } from '../components/SkeletonLoader';
 
 export default function ProfessorCourses() {
     const { t } = useLanguage();
@@ -45,7 +46,7 @@ export default function ProfessorCourses() {
                         <LanguageSwitcher />
                     </header>
                     {loading ? (
-                        <p>{t('loading_classes')}</p>
+                        <ProfessorCoursesPageSkeleton />
                     ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
                             {courses.map(course => (

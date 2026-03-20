@@ -5,6 +5,7 @@ import { Bell, Calendar, MapPin, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import html2canvas from 'html2canvas';
+import { ProfessorDashboardSkeleton } from '../components/SkeletonLoader';
 
 const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const HALF_HOURS = Array.from({ length: 30 }, (_, i) => ({ hour: Math.floor(i / 2) + 7, min: i % 2 === 0 ? 0 : 30 }));
@@ -92,7 +93,7 @@ export default function ProfessorDashboard() { // Removed 'token' prop
     };
 
     if (loading) {
-        return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}>{t('loading')}</div>;
+        return <ProfessorDashboardSkeleton />;
     }
 
     const totalStudentsEnrolled = courses.reduce((sum, c) => sum + (parseInt(c.enrolled_count) || 0), 0);

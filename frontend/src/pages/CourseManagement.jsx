@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Plus, Edit2, Trash2, Download, Users, X, Check } from 'lucide-react';
+import { Bell, Plus, Edit2, Trash2, Download, Users, X, Check, Search } from 'lucide-react';
+import { TablePageSkeleton } from '../components/SkeletonLoader';
 
 export default function CourseManagement() {
     const navigate = useNavigate();
@@ -11,6 +12,8 @@ export default function CourseManagement() {
     const [user, setUser] = useState(null);
     const [courses, setCourses] = useState([]);
     const [professorsList, setProfessorsList] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [profSearch, setProfSearch] = useState('');
 
     // Add Course Modal State
     const [showAddModal, setShowAddModal] = useState(false);
@@ -245,7 +248,17 @@ export default function CourseManagement() {
 
 
 
-    if (!user) return <div className="flex-center" style={{ height: '100vh', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{t('loading')}</div>;
+    const filteredCourses = useMemo(() => courses.filter(c =>
+        c.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.professors && c.professors.some(p => `${p.first_name} ${p.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())))
+    ), [courses, searchQuery]);
+
+    const filteredProfessors = useMemo(() => professorsList.filter(p =>
+        `${p.first_name} ${p.last_name}`.toLowerCase().includes(profSearch.toLowerCase())
+    ), [professorsList, profSearch]);
+
+    if (!user) return <TablePageSkeleton cols={8} />;
 
     return (
         <div style={{ display: 'flex', height: '100vh', background: 'var(--color-bg-dark)', overflow: 'hidden' }}>
@@ -272,7 +285,7 @@ export default function CourseManagement() {
                 </motion.header>
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-panel" style={{ padding: '2.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <h3 style={{ fontSize: '1.4rem', fontWeight: 600 }}>{t('all_courses')}</h3>
                         <button className="btn"
                             onClick={() => setShowAddModal(true)}
@@ -285,6 +298,13 @@ export default function CourseManagement() {
                             }}>
                             <Plus size={18} /> {t('add_new_course')}
                         </button>
+                    </div>
+                    {/* Search Bar */}
+                    <div style={{ display: 'flex', alignItems: 'center', padding: '0.7rem 1.2rem', borderRadius: '50px', marginBottom: '1.5rem', background: 'var(--color-bg-light)', border: '1px solid var(--glass-border)' }}>
+                        <Search size={18} color="var(--color-text-muted)" />
+                        <input type="text" placeholder={t('search_courses') || 'Search courses...'} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--color-text)', marginLeft: '0.8rem', padding: '0.3rem', fontFamily: 'var(--font-main)', fontSize: '0.95rem', flex: 1 }} />
+                        {searchQuery && <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '2px' }}><X size={16} /></button>}
                     </div>
 
                     <div style={{ overflowX: 'auto', background: 'var(--color-bg-light)', borderRadius: '12px', padding: '1rem', flex: 1 }}>
@@ -302,7 +322,7 @@ export default function CourseManagement() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {courses.map(course => (
+                                {filteredCourses.map(course => (
                                     <tr key={course.id} style={{ borderBottom: '1px solid var(--glass-border)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--color-surface-hover)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                         <td style={{ padding: '1rem', fontWeight: 700, color: 'var(--color-primary)' }}>{course.code}</td>
                                         <td style={{ padding: '1rem', fontWeight: 500 }}>{course.name}</td>
@@ -375,24 +395,51 @@ export default function CourseManagement() {
                         </div>
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text)', fontSize: '0.95rem' }}>{t('assign_professors')} <span style={{ fontWeight: 'normal', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>({t('optional')})</span></label>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', maxHeight: '120px', overflowY: 'auto', padding: '0.8rem', background: 'var(--color-bg-light)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                                {professorsList.map(prof => (
-                                    <label key={prof.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text)' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={newCourse.professor_ids.includes(prof.id)}
-                                            onChange={(e) => {
-                                                const updated = e.target.checked
-                                                    ? [...newCourse.professor_ids, prof.id]
-                                                    : newCourse.professor_ids.filter(id => id !== prof.id);
-                                                setNewCourse({ ...newCourse, professor_ids: updated });
-                                            }}
-                                            style={{ accentColor: 'var(--color-primary)' }}
-                                        />
-                                        {prof.first_name} {prof.last_name}
-                                    </label>
-                                ))}
-                                {professorsList.length === 0 && <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{t('no_professors_found')}</span>}
+                            {/* Selected professors as chips */}
+                            {newCourse.professor_ids.length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.5rem' }}>
+                                    {newCourse.professor_ids.map(pid => {
+                                        const prof = professorsList.find(p => p.id === pid);
+                                        if (!prof) return null;
+                                        return (
+                                            <span key={pid} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(242, 159, 5, 0.12)', color: 'var(--color-primary)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 600 }}>
+                                                {prof.first_name} {prof.last_name}
+                                                <button type="button" onClick={() => setNewCourse({ ...newCourse, professor_ids: newCourse.professor_ids.filter(id => id !== pid) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', padding: '0', display: 'flex' }}><X size={14} /></button>
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                            {/* Search input */}
+                            <div style={{ position: 'relative' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', padding: '0.6rem 0.8rem', background: 'var(--color-bg-light)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                    <Search size={15} color="var(--color-text-muted)" />
+                                    <input type="text" placeholder={t('search_professor') || 'Search professors...'} value={profSearch} onChange={e => setProfSearch(e.target.value)}
+                                        style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--color-text)', marginLeft: '0.5rem', fontSize: '0.88rem', flex: 1, fontFamily: 'var(--font-main)' }} />
+                                </div>
+                                {/* Dropdown list */}
+                                <div style={{ maxHeight: '120px', overflowY: 'auto', marginTop: '4px', background: 'var(--color-bg-light)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                    {filteredProfessors.map(prof => {
+                                        const isSelected = newCourse.professor_ids.includes(prof.id);
+                                        return (
+                                            <div key={prof.id}
+                                                onClick={() => {
+                                                    const updated = isSelected
+                                                        ? newCourse.professor_ids.filter(id => id !== prof.id)
+                                                        : [...newCourse.professor_ids, prof.id];
+                                                    setNewCourse({ ...newCourse, professor_ids: updated });
+                                                }}
+                                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.8rem', cursor: 'pointer', fontSize: '0.88rem', color: 'var(--color-text)', background: isSelected ? 'rgba(242, 159, 5, 0.08)' : 'transparent', transition: 'background 0.15s' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = isSelected ? 'rgba(242, 159, 5, 0.12)' : 'var(--color-surface-hover)'}
+                                                onMouseLeave={e => e.currentTarget.style.background = isSelected ? 'rgba(242, 159, 5, 0.08)' : 'transparent'}
+                                            >
+                                                <span>{prof.first_name} {prof.last_name}</span>
+                                                {isSelected && <Check size={15} color="var(--color-primary)" />}
+                                            </div>
+                                        );
+                                    })}
+                                    {filteredProfessors.length === 0 && <div style={{ padding: '0.6rem 0.8rem', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{t('no_professors_found')}</div>}
+                                </div>
                             </div>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '2rem' }}>
@@ -460,24 +507,51 @@ export default function CourseManagement() {
                         </div>
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text)', fontSize: '0.95rem' }}>{t('assign_professors')} <span style={{ fontWeight: 'normal', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>({t('optional')})</span></label>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', maxHeight: '120px', overflowY: 'auto', padding: '0.8rem', background: 'var(--color-bg-light)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                                {professorsList.map(prof => (
-                                    <label key={prof.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text)' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={newCourse.professor_ids.includes(prof.id)}
-                                            onChange={(e) => {
-                                                const updated = e.target.checked
-                                                    ? [...newCourse.professor_ids, prof.id]
-                                                    : newCourse.professor_ids.filter(id => id !== prof.id);
-                                                setNewCourse({ ...newCourse, professor_ids: updated });
-                                            }}
-                                            style={{ accentColor: 'var(--color-primary)' }}
-                                        />
-                                        {prof.first_name} {prof.last_name}
-                                    </label>
-                                ))}
-                                {professorsList.length === 0 && <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{t('no_professors_found')}</span>}
+                            {/* Selected professors as chips */}
+                            {newCourse.professor_ids.length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.5rem' }}>
+                                    {newCourse.professor_ids.map(pid => {
+                                        const prof = professorsList.find(p => p.id === pid);
+                                        if (!prof) return null;
+                                        return (
+                                            <span key={pid} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(242, 159, 5, 0.12)', color: 'var(--color-primary)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 600 }}>
+                                                {prof.first_name} {prof.last_name}
+                                                <button type="button" onClick={() => setNewCourse({ ...newCourse, professor_ids: newCourse.professor_ids.filter(id => id !== pid) })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', padding: '0', display: 'flex' }}><X size={14} /></button>
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                            {/* Search input */}
+                            <div style={{ position: 'relative' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', padding: '0.6rem 0.8rem', background: 'var(--color-bg-light)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                    <Search size={15} color="var(--color-text-muted)" />
+                                    <input type="text" placeholder={t('search_professor') || 'Search professors...'} value={profSearch} onChange={e => setProfSearch(e.target.value)}
+                                        style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--color-text)', marginLeft: '0.5rem', fontSize: '0.88rem', flex: 1, fontFamily: 'var(--font-main)' }} />
+                                </div>
+                                {/* Dropdown list */}
+                                <div style={{ maxHeight: '120px', overflowY: 'auto', marginTop: '4px', background: 'var(--color-bg-light)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                    {filteredProfessors.map(prof => {
+                                        const isSelected = newCourse.professor_ids.includes(prof.id);
+                                        return (
+                                            <div key={prof.id}
+                                                onClick={() => {
+                                                    const updated = isSelected
+                                                        ? newCourse.professor_ids.filter(id => id !== prof.id)
+                                                        : [...newCourse.professor_ids, prof.id];
+                                                    setNewCourse({ ...newCourse, professor_ids: updated });
+                                                }}
+                                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.8rem', cursor: 'pointer', fontSize: '0.88rem', color: 'var(--color-text)', background: isSelected ? 'rgba(242, 159, 5, 0.08)' : 'transparent', transition: 'background 0.15s' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = isSelected ? 'rgba(242, 159, 5, 0.12)' : 'var(--color-surface-hover)'}
+                                                onMouseLeave={e => e.currentTarget.style.background = isSelected ? 'rgba(242, 159, 5, 0.08)' : 'transparent'}
+                                            >
+                                                <span>{prof.first_name} {prof.last_name}</span>
+                                                {isSelected && <Check size={15} color="var(--color-primary)" />}
+                                            </div>
+                                        );
+                                    })}
+                                    {filteredProfessors.length === 0 && <div style={{ padding: '0.6rem 0.8rem', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{t('no_professors_found')}</div>}
+                                </div>
                             </div>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '2rem' }}>
