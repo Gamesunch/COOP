@@ -28,60 +28,63 @@ exports.setPhase = async (req, res) => {
             [phase]
         );
 
-        // If transitioning to ENROLLMENT, process PRE_ENROLLED students
         if (phase === 'ENROLLMENT') {
-            // Get all courses
-            const coursesRes = await db.query("SELECT id, capacity FROM courses");
+            // STEP 1: Process ALL PRE_ENROLLED students for ALL courses in one query
+            // We use a Common Table Expression (CTE) to calculate rank and capacity for every course at once
+            await db.query(`
+                WITH CurrentEnrolled AS (
+                    SELECT course_id, COUNT(*) as enrolled_count
+                    FROM enrollments
+                    WHERE status = 'ENROLLED'
+                    GROUP BY course_id
+                ),
+                RankedPreEnrollments AS (
+                    SELECT 
+                        e.id, 
+                        e.course_id, 
+                        c.capacity,
+                        COALESCE(ce.enrolled_count, 0) as current_enrolled,
+                        ROW_NUMBER() OVER(PARTITION BY e.course_id ORDER BY e.enrolled_at ASC) as pre_rank
+                    FROM enrollments e
+                    JOIN courses c ON e.course_id = c.id
+                    LEFT JOIN CurrentEnrolled ce ON e.course_id = ce.course_id
+                    WHERE e.status = 'PRE_ENROLLED'
+                )
+                UPDATE enrollments
+                SET status = CASE 
+                    WHEN sub.pre_rank <= (sub.capacity - sub.current_enrolled) THEN 'ENROLLED'::enrollment_status 
+                    ELSE 'WAITLISTED'::enrollment_status 
+                END
+                FROM RankedPreEnrollments sub
+                WHERE enrollments.id = sub.id
+            `);
 
-            for (const course of coursesRes.rows) {
-                const course_id = course.id;
-                let capacity = course.capacity;
-
-                // Count current officially ENROLLED
-                const enrolledRes = await db.query(
-                    "SELECT COUNT(*) FROM enrollments WHERE course_id = $1 AND status = 'ENROLLED'",
-                    [course_id]
-                );
-                let currentEnrolled = parseInt(enrolledRes.rows[0].count);
-                let availableSeats = capacity - currentEnrolled;
-
-                // Optimized: Process all PRE_ENROLLED students for this course in ONE query
-                await db.query(`
-                    UPDATE enrollments
-                    SET status = CASE 
-                        WHEN sub.row_num <= $2 THEN 'ENROLLED'::enrollment_status 
-                        ELSE 'WAITLISTED'::enrollment_status 
-                    END
-                    FROM (
-                        SELECT id, ROW_NUMBER() OVER (ORDER BY enrolled_at ASC) as row_num
-                        FROM enrollments
-                        WHERE course_id = $1 AND status = 'PRE_ENROLLED'
-                    ) as sub
-                    WHERE enrollments.id = sub.id
-                `, [course_id, availableSeats]);
-
-                // Recalculate available seats for waitlist promotion
-                const newTotalEnrolledRes = await db.query(
-                    "SELECT COUNT(*) FROM enrollments WHERE course_id = $1 AND status = 'ENROLLED'",
-                    [course_id]
-                );
-                const newTotalEnrolled = parseInt(newTotalEnrolledRes.rows[0].count);
-                availableSeats = capacity - newTotalEnrolled;
-
-                // Optimized: Promote current WAITLISTED students if seats remain
-                if (availableSeats > 0) {
-                    await db.query(`
-                        UPDATE enrollments 
-                        SET status = 'ENROLLED' 
-                        WHERE id IN (
-                            SELECT id FROM enrollments 
-                            WHERE course_id = $1 AND status = 'WAITLISTED' 
-                            ORDER BY enrolled_at ASC 
-                            LIMIT $2
-                        )
-                    `, [course_id, availableSeats]);
-                }
-            }
+            // STEP 2: Promote WAITLISTED students for any courses that still have seats
+            // (e.g. if pre-enrolled were fewer than capacity)
+            await db.query(`
+                WITH CurrentEnrolled AS (
+                    SELECT course_id, COUNT(*) as enrolled_count
+                    FROM enrollments
+                    WHERE status = 'ENROLLED'
+                    GROUP BY course_id
+                ),
+                PromotableWaitlist AS (
+                    SELECT 
+                        e.id,
+                        ROW_NUMBER() OVER(PARTITION BY e.course_id ORDER BY e.enrolled_at ASC) as wait_rank,
+                        (c.capacity - COALESCE(ce.enrolled_count, 0)) as available_seats
+                    FROM enrollments e
+                    JOIN courses c ON e.course_id = c.id
+                    LEFT JOIN CurrentEnrolled ce ON e.course_id = ce.course_id
+                    WHERE e.status = 'WAITLISTED'
+                )
+                UPDATE enrollments
+                SET status = 'ENROLLED'::enrollment_status
+                FROM PromotableWaitlist sub
+                WHERE enrollments.id = sub.id
+                AND sub.wait_rank <= sub.available_seats
+                AND sub.available_seats > 0
+            `);
         }
 
         await db.query("COMMIT");
