@@ -222,13 +222,13 @@ export default function StudyPath() {
             });
             const data = await res.json();
             if (res.ok) {
-                alert(t('successfully_enrolled'));
                 fetchData();
             } else {
-                alert(data.error || t('enrollment_failed'));
+                console.error(data.error || t('enrollment_failed'));
+                alert(data.error || t('enrollment_failed')); // Keep error alert just in case of failure, usually helpful
             }
         } catch (err) {
-            alert(t('server_error_enrollment'));
+            console.error(err);
         }
         setEnrollingId(null);
     };
@@ -434,7 +434,7 @@ export default function StudyPath() {
                             style={{
                                 background: activeArrowCourseId === course.id ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
                                 border: `1px solid ${activeArrowCourseId === course.id ? 'rgba(59, 130, 246, 0.4)' : 'transparent'}`,
-                                color: activeArrowCourseId === course.id ? '#3b82f6' : 'rgba(255,255,255,0.2)',
+                                color: activeArrowCourseId === course.id ? '#3b82f6' : 'var(--color-text-muted)',
                                 borderRadius: '4px',
                                 padding: '4px',
                                 cursor: 'pointer',
