@@ -109,6 +109,7 @@ Thumbs.db
 # Uploaded profile pictures
 backend/uploads/*
 !backend/uploads/.gitkeep
+backend/scripts/
 Report Project SA.pdf
 userfortest.txt
 course_bachelor3.pdf
