@@ -268,10 +268,11 @@ export default function AdminDashboard({ user, token, adminPhase, setAdminPhase 
                                             <tr key={course.id} style={{ borderBottom: '1px solid var(--glass-border)', background: isBottleneck ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
                                                 <td style={{ padding: '0.8rem', fontWeight: 600 }}>{course.code} - {course.name}</td>
                                                 <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.capacity}</td>
+                                                <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.enrolled_count}</td>
+                                                <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.waitlisted_count}</td>
                                                 <td style={{ padding: '0.8rem', textAlign: 'center', color: isBottleneck ? '#ef4444' : 'var(--color-text)', fontWeight: isBottleneck ? 700 : 500 }}>
                                                     {course.pre_enrolled_count} {isBottleneck && '⚠️'}
                                                 </td>
-                                                <td style={{ padding: '0.8rem', textAlign: 'center' }}>{course.enrolled_count}</td>
                                                 <td style={{ padding: '0.8rem', textAlign: 'right' }}>
                                                     <button
                                                         onClick={() => setCapacityModal({ 
